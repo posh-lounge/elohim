@@ -1,0 +1,16 @@
+# frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/next-env.d.ts
+
+# backend
+backend/.env
+backend/vendor/
+.next
+node_modules
+.env
+# general
+.DS_Store
+*.log
+frontend/tsconfig.tsbuildinfo
