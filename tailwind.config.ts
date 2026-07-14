@@ -26,6 +26,8 @@ const config: Config = {
         'logistics-soft': 'var(--logistics-soft)',
         office: 'var(--office)',
         'office-soft': 'var(--office-soft)',
+        accountant: 'var(--accountant)',
+        'accountant-soft': 'var(--accountant-soft)',
         danger: 'var(--danger)',
         success: 'var(--success)',
       },

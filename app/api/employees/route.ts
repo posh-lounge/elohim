@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callPhpApi, PhpApiError } from '@/lib/serverApi';
 import { getSessionToken } from '@/lib/session';
-import type { Task } from '@/lib/types';
+import type { Employee } from '@/lib/types';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const token = getSessionToken();
   if (!token) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   }
 
-  const scope = req.nextUrl.searchParams.get('scope') ?? 'my';
-  const role = req.nextUrl.searchParams.get('role');
-
   try {
-    const searchParams: Record<string, string> = { scope };
-    if (role) searchParams.role = role;
-    const data = await callPhpApi<{ tasks: Task[] }>('/tasks', { token, searchParams });
+    const data = await callPhpApi<{ employees: Employee[] }>('/employees', { token });
     return NextResponse.json(data);
   } catch (e) {
     const status = e instanceof PhpApiError ? e.status : 500;
-    const message = e instanceof Error ? e.message : 'Failed to load tasks';
+    const message = e instanceof Error ? e.message : 'Failed to load employees';
     return NextResponse.json({ error: message }, { status });
   }
 }
@@ -29,15 +24,14 @@ export async function POST(req: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   }
-
   const body = await req.json();
 
   try {
-    const data = await callPhpApi<{ id: number }>('/tasks', { method: 'POST', token, body });
+    const data = await callPhpApi<{ id: number }>('/employees', { method: 'POST', token, body });
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
     const status = e instanceof PhpApiError ? e.status : 500;
-    const message = e instanceof Error ? e.message : 'Failed to create task';
+    const message = e instanceof Error ? e.message : 'Failed to create employee';
     return NextResponse.json({ error: message }, { status });
   }
 }

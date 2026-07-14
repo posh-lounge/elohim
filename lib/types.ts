@@ -6,10 +6,16 @@ export type RoleKey =
   | 'apartment_manager'
   | 'recruitment_specialist'
   | 'logistics_coordinator'
-  | 'personal_assistant';
+  | 'personal_assistant'
+  | 'accountant';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
+
+export interface RoleContentItem {
+  id: number;
+  text: string;
+}
 
 export interface Role {
   key: RoleKey;
@@ -17,8 +23,8 @@ export interface Role {
   department: string;
   reportsTo: RoleKey | null;
   purpose: string;
-  responsibilities: string[];
-  kpis: string[];
+  responsibilities: RoleContentItem[];
+  kpis: RoleContentItem[];
 }
 
 export interface TaskUpdate {
@@ -102,6 +108,56 @@ export interface LeaveRequest {
   decidedByName: string | null;
 }
 
+export type EmploymentType = 'permanent' | 'contractor';
+
+export interface Employee {
+  id: number;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  position: string;
+  department: string;
+  employmentType: EmploymentType;
+  hireDate: string | null;
+  isActive: boolean;
+  notes: string | null;
+  createdAt: string;
+  roleKey: RoleKey | null;
+  hasSystemAccess: boolean;
+}
+
+export type PayrollCategory =
+  | 'base_salary' | 'bonus' | 'loan' | 'advance'
+  | 'rssb_paye' | 'rssb_maternity' | 'rssb_mutuelle' | 'rssb_pension' | 'other';
+
+export interface PayrollEntry {
+  id: number;
+  employeeId: number;
+  employeeName: string;
+  employmentType: EmploymentType;
+  period: string;
+  category: PayrollCategory;
+  direction: 'earning' | 'deduction';
+  amount: number;
+  note: string | null;
+  recordedByRole: RoleKey;
+  createdAt: string;
+}
+
+export const PAYROLL_CATEGORY_LABEL: Record<PayrollCategory, string> = {
+  base_salary: 'Base salary',
+  bonus: 'Bonus',
+  loan: 'Loan',
+  advance: 'Advance',
+  rssb_paye: 'RSSB — PAYE',
+  rssb_maternity: 'RSSB — Maternity',
+  rssb_mutuelle: 'RSSB — Mutuelle',
+  rssb_pension: 'RSSB — Pension',
+  other: 'Other',
+};
+
+export const RSSB_CATEGORIES: PayrollCategory[] = ['rssb_paye', 'rssb_maternity', 'rssb_mutuelle', 'rssb_pension'];
+
 export interface ActivityEntry {
   id: number;
   action: string;
@@ -121,7 +177,7 @@ export type TaskScope = 'my' | 'team' | 'all';
 // manager who wants work done outside their own direct reports routes
 // it through the person who actually manages that role.
 export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
-  owner: ['ops_manager', 'personal_assistant'],
+  owner: ['ops_manager', 'personal_assistant', 'accountant'],
   ops_manager: ['restaurant_gm', 'apartment_manager', 'recruitment_specialist', 'logistics_coordinator'],
   restaurant_gm: ['bar_manager'],
   bar_manager: [],
@@ -129,4 +185,5 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
   recruitment_specialist: [],
   logistics_coordinator: [],
   personal_assistant: [],
+  accountant: [],
 };

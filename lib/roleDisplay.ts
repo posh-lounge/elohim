@@ -1,4 +1,4 @@
-import { Crown, Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, type LucideIcon } from 'lucide-react';
+import { Crown, Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, Calculator, type LucideIcon } from 'lucide-react';
 import type { RoleKey } from './types';
 
 export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
@@ -10,6 +10,7 @@ export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
   recruitment_specialist: Users,
   logistics_coordinator: Truck,
   personal_assistant: ClipboardList,
+  accountant: Calculator,
 };
 
 // Tailwind class fragments (text/border/bg) keyed by the department accent
@@ -24,6 +25,7 @@ export const ROLE_ACCENT: Record<RoleKey, { text: string; border: string; bg: st
   recruitment_specialist:   { text: 'text-recruitment', border: 'border-recruitment', bg: 'bg-recruitment', softBg: 'bg-recruitment-soft' },
   logistics_coordinator:    { text: 'text-logistics',   border: 'border-logistics',   bg: 'bg-logistics',   softBg: 'bg-logistics-soft' },
   personal_assistant:       { text: 'text-office',      border: 'border-office',      bg: 'bg-office',      softBg: 'bg-office-soft' },
+  accountant:               { text: 'text-accountant',  border: 'border-accountant',  bg: 'bg-accountant',  softBg: 'bg-accountant-soft' },
 };
 
 export const PRIORITY_ACCENT: Record<'low' | 'medium' | 'high', string> = {

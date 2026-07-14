@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callPhpApi, PhpApiError } from '@/lib/serverApi';
 import { getSessionToken } from '@/lib/session';
-import type { Task } from '@/lib/types';
+import type { PayrollEntry } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
   const token = getSessionToken();
@@ -9,17 +9,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   }
 
-  const scope = req.nextUrl.searchParams.get('scope') ?? 'my';
-  const role = req.nextUrl.searchParams.get('role');
+  const searchParams: Record<string, string> = {};
+  const employeeId = req.nextUrl.searchParams.get('employeeId');
+  const period = req.nextUrl.searchParams.get('period');
+  if (employeeId) searchParams.employeeId = employeeId;
+  if (period) searchParams.period = period;
 
   try {
-    const searchParams: Record<string, string> = { scope };
-    if (role) searchParams.role = role;
-    const data = await callPhpApi<{ tasks: Task[] }>('/tasks', { token, searchParams });
+    const data = await callPhpApi<{ entries: PayrollEntry[] }>('/payroll', { token, searchParams });
     return NextResponse.json(data);
   } catch (e) {
     const status = e instanceof PhpApiError ? e.status : 500;
-    const message = e instanceof Error ? e.message : 'Failed to load tasks';
+    const message = e instanceof Error ? e.message : 'Failed to load payroll';
     return NextResponse.json({ error: message }, { status });
   }
 }
@@ -29,15 +30,14 @@ export async function POST(req: NextRequest) {
   if (!token) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   }
-
   const body = await req.json();
 
   try {
-    const data = await callPhpApi<{ id: number }>('/tasks', { method: 'POST', token, body });
+    const data = await callPhpApi<{ id: number; direction: string }>('/payroll', { method: 'POST', token, body });
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
     const status = e instanceof PhpApiError ? e.status : 500;
-    const message = e instanceof Error ? e.message : 'Failed to create task';
+    const message = e instanceof Error ? e.message : 'Failed to add payroll entry';
     return NextResponse.json({ error: message }, { status });
   }
 }
