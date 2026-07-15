@@ -161,7 +161,7 @@ export const PAYROLL_CATEGORY_LABEL: Record<PayrollCategory, string> = {
   advance: 'Advance',
   rssb_paye: 'RSSB — PAYE',
   rssb_maternity_employer: 'RSSB — Maternity (employer)',
-  rssb_maternity: 'RSSB — Maternity (employer)',
+  rssb_maternity: 'RSSB — Maternity',
   rssb_mutuelle: 'RSSB — CBHI (Mutuelle)',
   rssb_pension: 'RSSB — Pension (employee)',
   rssb_pension_employer: 'RSSB — Pension (employer)',
