@@ -211,4 +211,4 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
 // (skip a doomed fetch, show the same clean "no visibility" message as any
 // other unauthorized case); the backend re-checks this on every request
 // regardless.
-export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner', 'personal_assistant'];
+export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner'];
