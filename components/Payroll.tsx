@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Play, Plus, Trash2 } from 'lucide-react';
 import type { PayrollEntry } from '@/lib/types';
 import { PAYROLL_CATEGORY_LABEL } from '@/lib/types';
 import { useEmployees } from '@/hooks/useEmployees';
 import { usePayroll, useDeletePayrollEntry } from '@/hooks/usePayroll';
+import { RunPayrollModal } from './RunPayrollModal';
 import { AddPayrollEntryModal } from './AddPayrollEntryModal';
 
 function currentPeriod() {
@@ -22,6 +23,7 @@ function EmployeePayrollCard({ employeeName, entries, onDelete }: {
 }) {
   const earnings = entries.filter((e) => e.direction === 'earning').reduce((sum, e) => sum + e.amount, 0);
   const deductions = entries.filter((e) => e.direction === 'deduction').reduce((sum, e) => sum + e.amount, 0);
+  const employerCosts = entries.filter((e) => e.direction === 'employer_cost').reduce((sum, e) => sum + e.amount, 0);
   const net = earnings - deductions;
 
   return (
@@ -30,12 +32,12 @@ function EmployeePayrollCard({ employeeName, entries, onDelete }: {
         <div className="text-[13.5px] font-semibold">{employeeName}</div>
         <div className="text-right">
           <div className="text-lg font-display font-bold text-gold">{fmtRWF(net)}</div>
-          <div className="text-[10px] text-faint font-mono">net</div>
+          <div className="text-[10px] text-faint font-mono">net to employee</div>
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5 mb-3">
-        {entries.map((e) => (
+        {entries.filter((e) => e.direction !== 'employer_cost').map((e) => (
           <div key={e.id} className="flex items-center justify-between text-[12px] group">
             <span className="text-muted">{PAYROLL_CATEGORY_LABEL[e.category]}{e.note ? ` — ${e.note}` : ''}</span>
             <span className="flex items-center gap-2">
@@ -50,16 +52,29 @@ function EmployeePayrollCard({ employeeName, entries, onDelete }: {
         ))}
       </div>
 
-      <div className="flex justify-between text-[11px] text-faint border-t border-border-soft pt-2 font-mono">
+      <div className="flex justify-between text-[11px] text-faint border-t border-border-soft pt-2 font-mono mb-2">
         <span>Earnings: {fmtRWF(earnings)}</span>
         <span>Deductions: {fmtRWF(deductions)}</span>
       </div>
+
+      {employerCosts > 0 && (
+        <div className="text-[10.5px] text-faint bg-surface-alt rounded-lg px-2.5 py-2">
+          <div className="uppercase tracking-wide font-mono mb-1">Employer cost (not deducted from employee)</div>
+          {entries.filter((e) => e.direction === 'employer_cost').map((e) => (
+            <div key={e.id} className="flex justify-between">
+              <span>{PAYROLL_CATEGORY_LABEL[e.category]}</span>
+              <span>{fmtRWF(e.amount)}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export function Payroll() {
   const [period, setPeriod] = useState(currentPeriod());
+  const [showRun, setShowRun] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const employeesQuery = useEmployees();
   const payrollQuery = usePayroll({ period });
@@ -80,16 +95,22 @@ export function Payroll() {
           type="month" value={period} onChange={(e) => setPeriod(e.target.value)}
           className="bg-surface-alt border border-border rounded-lg px-3 py-1.5 text-[12.5px]"
         />
-        <button
-          onClick={() => setShowAdd(true)} disabled={activeEmployees.length === 0}
-          className="flex items-center gap-1.5 bg-gold text-[#1A1408] font-bold rounded-lg px-3 py-1.5 text-xs disabled:opacity-40"
-        ><Plus size={13} /> Add entry</button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAdd(true)} disabled={activeEmployees.length === 0}
+            className="flex items-center gap-1.5 bg-surface-alt border border-border text-muted rounded-lg px-3 py-1.5 text-xs disabled:opacity-40"
+          ><Plus size={13} /> One-off entry</button>
+          <button
+            onClick={() => setShowRun(true)} disabled={activeEmployees.length === 0}
+            className="flex items-center gap-1.5 bg-gold text-[#1A1408] font-bold rounded-lg px-3 py-1.5 text-xs disabled:opacity-40"
+          ><Play size={13} /> Run payroll</button>
+        </div>
       </div>
 
       {payrollQuery.isLoading && <div className="text-sm text-faint py-8">Loading payroll…</div>}
 
       {payrollQuery.data && Object.keys(entriesByEmployee).length === 0 && (
-        <div className="text-[13px] text-faint py-8">No payroll entries for {period} yet.</div>
+        <div className="text-[13px] text-faint py-8">No payroll entries for {period} yet — run payroll to get started.</div>
       )}
 
       {Object.keys(entriesByEmployee).length > 0 && (
@@ -100,9 +121,8 @@ export function Payroll() {
         </div>
       )}
 
-      {showAdd && (
-        <AddPayrollEntryModal employees={activeEmployees} defaultPeriod={period} onClose={() => setShowAdd(false)} />
-      )}
+      {showRun && <RunPayrollModal employees={activeEmployees} defaultPeriod={period} onClose={() => setShowRun(false)} />}
+      {showAdd && <AddPayrollEntryModal employees={activeEmployees} defaultPeriod={period} onClose={() => setShowAdd(false)} />}
     </div>
   );
 }

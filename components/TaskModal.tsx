@@ -43,6 +43,9 @@ export function TaskModal({
               <span className="text-[11.5px] text-muted font-mono">{roleLabelByKey[task.assignedToRole]}</span>
             </div>
             <div className="font-display text-lg font-semibold">{task.title}</div>
+            {task.responsibility && (
+              <div className="text-[11.5px] text-faint italic mt-1">↳ {task.responsibility.text}</div>
+            )}
           </div>
           <button onClick={onClose} className="text-faint"><X size={18} /></button>
         </div>

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ChevronDown, Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import type { Role, RoleContentItem, RoleKey } from '@/lib/types';
-import { ASSIGNABLE_ROLES } from '@/lib/types';
 import { ROLE_ICON, ROLE_ACCENT } from '@/lib/roleDisplay';
 import { useAddRoleItem, useUpdateRoleItem, useDeleteRoleItem } from '@/hooks/useRoleContent';
 
@@ -92,7 +91,7 @@ export function Dossier({ role, roleLabelByKey, currentRoleKey }: {
   const [open, setOpen] = useState(true);
   const Icon = ROLE_ICON[role.key];
   const accent = ROLE_ACCENT[role.key];
-  const canEdit = currentRoleKey === role.key || (ASSIGNABLE_ROLES[currentRoleKey] ?? []).includes(role.key);
+  const canEdit = currentRoleKey === 'owner';
 
   return (
     <div className="bg-surface border border-border rounded-xl mb-4 overflow-hidden">

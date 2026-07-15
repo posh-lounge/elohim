@@ -3,6 +3,7 @@
 import {
   ClipboardList, ArrowRightLeft, MessageSquare, UserPlus, UserCog, UserX, UserCheck, KeyRound,
   LogIn, ShieldAlert, TrendingUp, LineChart, CalendarPlus, Check, X as XIcon,
+  ListPlus, Pencil, Trash2, Wallet, Receipt,
 } from 'lucide-react';
 import { useActivity } from '@/hooks/useActivity';
 import { ROLE_ACCENT } from '@/lib/roleDisplay';
@@ -25,6 +26,17 @@ const ACTION_META: Record<string, { label: string; icon: any }> = {
   'leave.requested': { label: 'requested leave', icon: CalendarPlus },
   'leave.approved': { label: 'approved a leave request', icon: Check },
   'leave.denied': { label: 'denied a leave request', icon: XIcon },
+  'role.responsibility_item_added': { label: 'added a responsibility', icon: ListPlus },
+  'role.responsibility_item_edited': { label: 'edited a responsibility', icon: Pencil },
+  'role.responsibility_item_deleted': { label: 'removed a responsibility', icon: Trash2 },
+  'role.kpi_item_added': { label: 'added a KPI criterion', icon: ListPlus },
+  'role.kpi_item_edited': { label: 'edited a KPI criterion', icon: Pencil },
+  'role.kpi_item_deleted': { label: 'removed a KPI criterion', icon: Trash2 },
+  'employee.created': { label: 'added an employee', icon: UserPlus },
+  'employee.updated': { label: 'updated an employee', icon: UserCog },
+  'payroll.run': { label: 'ran payroll', icon: Wallet },
+  'payroll.entry_added': { label: 'added a payroll entry', icon: Receipt },
+  'payroll.entry_deleted': { label: 'removed a payroll entry', icon: Trash2 },
 };
 
 function fmtDateTime(iso: string) {
@@ -37,8 +49,12 @@ function metaSummary(entry: ActivityEntry): string | null {
   if (!entry.meta) return null;
   const m = entry.meta;
   if (m.title) return String(m.title);
+  if (m.name) return String(m.name);
   if (m.email) return String(m.email);
   if (m.label) return String(m.label);
+  if (m.text) return String(m.text);
+  if (entry.action === 'payroll.run' && m.period) return `${m.period} — gross ${Number(m.gross).toLocaleString()} RWF`;
+  if (entry.action === 'payroll.entry_added' && m.category) return `${String(m.category).replace(/_/g, ' ')} — ${Number(m.amount).toLocaleString()} RWF`;
   if (m.to) return `→ ${String(m.to).replace('_', ' ')}`;
   if (m.roleKey) return String(m.roleKey).replace('_', ' ');
   return null;

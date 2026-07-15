@@ -1,31 +1,21 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { X, Plus } from 'lucide-react';
 import type { Employee, PayrollCategory } from '@/lib/types';
-import { PAYROLL_CATEGORY_LABEL, RSSB_CATEGORIES } from '@/lib/types';
+import { PAYROLL_CATEGORY_LABEL, MANUAL_PAYROLL_CATEGORIES } from '@/lib/types';
 import { useCreatePayrollEntry } from '@/hooks/usePayroll';
-
-const ALL_CATEGORIES: PayrollCategory[] = ['base_salary', 'bonus', 'loan', 'advance', 'rssb_paye', 'rssb_maternity', 'rssb_mutuelle', 'rssb_pension', 'other'];
 
 export function AddPayrollEntryModal({ employees, defaultPeriod, onClose }: {
   employees: Employee[]; defaultPeriod: string; onClose: () => void;
 }) {
   const [employeeId, setEmployeeId] = useState<number>(employees[0]?.id ?? 0);
   const [period, setPeriod] = useState(defaultPeriod);
-  const [category, setCategory] = useState<PayrollCategory>('base_salary');
+  const [category, setCategory] = useState<PayrollCategory>('bonus');
   const [amount, setAmount] = useState('');
   const [direction, setDirection] = useState<'earning' | 'deduction'>('earning');
   const [note, setNote] = useState('');
   const createEntry = useCreatePayrollEntry();
-
-  const selectedEmployee = employees.find((e) => e.id === employeeId);
-  const isContractor = selectedEmployee?.employmentType === 'contractor';
-
-  const availableCategories = useMemo(
-    () => (isContractor ? ALL_CATEGORIES.filter((c) => !RSSB_CATEGORIES.includes(c)) : ALL_CATEGORIES),
-    [isContractor]
-  );
 
   const submit = () => {
     const numeric = Number(amount);
@@ -46,10 +36,14 @@ export function AddPayrollEntryModal({ employees, defaultPeriod, onClose }: {
     <div onClick={onClose} className="fixed inset-0 bg-black/70 flex items-start justify-center p-6 z-50 overflow-y-auto">
       <div onClick={(e) => e.stopPropagation()} className="bg-surface border border-border rounded-xl w-full max-w-md animate-fade-in">
         <div className="px-5 py-4 border-b border-border-soft flex justify-between items-center">
-          <div className="font-display text-lg font-semibold">Add payroll entry</div>
+          <div className="font-display text-lg font-semibold">Add a one-off entry</div>
           <button onClick={onClose} className="text-faint"><X size={18} /></button>
         </div>
         <div className="p-5 flex flex-col gap-3.5">
+          <div className="text-[11px] text-faint bg-surface-alt border border-border-soft rounded-lg px-3 py-2">
+            For bonuses, loans, advances, or anything else one-off. Base salary and RSSB figures are
+            calculated together in <strong className="text-muted">Run payroll</strong>, not added here.
+          </div>
           <div>
             <label className={label}>Employee</label>
             <select value={employeeId} onChange={(e) => setEmployeeId(Number(e.target.value))} className={field}>
@@ -66,13 +60,10 @@ export function AddPayrollEntryModal({ employees, defaultPeriod, onClose }: {
             <div className="flex-1">
               <label className={label}>Category</label>
               <select value={category} onChange={(e) => setCategory(e.target.value as PayrollCategory)} className={field}>
-                {availableCategories.map((c) => <option key={c} value={c}>{PAYROLL_CATEGORY_LABEL[c]}</option>)}
+                {MANUAL_PAYROLL_CATEGORIES.map((c) => <option key={c} value={c}>{PAYROLL_CATEGORY_LABEL[c]}</option>)}
               </select>
             </div>
           </div>
-          {isContractor && (
-            <div className="text-[10.5px] text-faint -mt-2">RSSB categories are hidden — {selectedEmployee?.name} is a contractor.</div>
-          )}
           {category === 'other' && (
             <div>
               <label className={label}>This entry is a…</label>

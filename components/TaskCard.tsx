@@ -36,6 +36,10 @@ export function TaskCard({
         {!isMoving && <PriorityStamp priority={task.priority} />}
       </div>
 
+      {task.responsibility && (
+        <div className="text-[10.5px] text-faint mt-1 italic truncate">↳ {task.responsibility.text}</div>
+      )}
+
       <div className="flex items-center justify-between mt-2">
         <span className="flex items-center gap-1.5 text-[11.5px] text-muted font-mono">
           <span className={`w-1.5 h-1.5 rounded-full ${accent.bg}`} />

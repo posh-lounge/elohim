@@ -38,6 +38,25 @@ export function useCreatePayrollEntry() {
   });
 }
 
+export interface RunPayrollInput {
+  period: string;
+  entries: { employeeId: number; grossSalary: number }[];
+}
+
+export function useRunPayroll() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: RunPayrollInput) => apiRequest<{ period: string; results: { employeeId: number; employeeName: string; netSalary: number }[] }>('/api/payroll/run', { method: 'POST', body: input }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['payroll'] });
+      toast.success(`Payroll run for ${data.results.length} ${data.results.length === 1 ? 'person' : 'people'}`, {
+        description: data.period,
+      });
+    },
+    onError: (err) => toast.error('Could not run payroll', { description: (err as Error).message }),
+  });
+}
+
 export function useDeletePayrollEntry() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -45,6 +45,7 @@ export interface Task {
   createdAt: string;
   assignedToRole: RoleKey;
   assignedByRole: RoleKey;
+  responsibility: RoleContentItem | null;
   updates: TaskUpdate[];
 }
 
@@ -128,7 +129,7 @@ export interface Employee {
 
 export type PayrollCategory =
   | 'base_salary' | 'bonus' | 'loan' | 'advance'
-  | 'rssb_paye' | 'rssb_maternity' | 'rssb_mutuelle' | 'rssb_pension' | 'other';
+  | 'rssb_paye' | 'rssb_maternity' | 'rssb_mutuelle' | 'rssb_pension' | 'rssb_pension_employer' | 'other';
 
 export interface PayrollEntry {
   id: number;
@@ -137,7 +138,7 @@ export interface PayrollEntry {
   employmentType: EmploymentType;
   period: string;
   category: PayrollCategory;
-  direction: 'earning' | 'deduction';
+  direction: 'earning' | 'deduction' | 'employer_cost';
   amount: number;
   note: string | null;
   recordedByRole: RoleKey;
@@ -150,13 +151,19 @@ export const PAYROLL_CATEGORY_LABEL: Record<PayrollCategory, string> = {
   loan: 'Loan',
   advance: 'Advance',
   rssb_paye: 'RSSB — PAYE',
-  rssb_maternity: 'RSSB — Maternity',
-  rssb_mutuelle: 'RSSB — Mutuelle',
-  rssb_pension: 'RSSB — Pension',
+  rssb_maternity: 'RSSB — Maternity (employer)',
+  rssb_mutuelle: 'RSSB — CBHI (Mutuelle)',
+  rssb_pension: 'RSSB — Pension (employee)',
+  rssb_pension_employer: 'RSSB — Pension (employer)',
   other: 'Other',
 };
 
-export const RSSB_CATEGORIES: PayrollCategory[] = ['rssb_paye', 'rssb_maternity', 'rssb_mutuelle', 'rssb_pension'];
+// Categories only the "Run payroll" batch action can produce — never a
+// manual single-entry add, so a re-run can safely replace them in place.
+export const AUTO_CALCULATED_CATEGORIES: PayrollCategory[] = [
+  'base_salary', 'rssb_pension', 'rssb_pension_employer', 'rssb_maternity', 'rssb_paye', 'rssb_mutuelle',
+];
+export const MANUAL_PAYROLL_CATEGORIES: PayrollCategory[] = ['bonus', 'loan', 'advance', 'other'];
 
 export interface ActivityEntry {
   id: number;
