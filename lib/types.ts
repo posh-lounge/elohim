@@ -194,3 +194,4 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
   personal_assistant: [],
   accountant: [],
 };
+export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['personal_assistant', 'owner'];

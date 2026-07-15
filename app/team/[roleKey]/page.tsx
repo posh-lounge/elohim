@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import type { RoleKey, TaskStatus } from '@/lib/types';
-import { ASSIGNABLE_ROLES } from '@/lib/types';
+import { ASSIGNABLE_ROLES, HIDDEN_FROM_OPS_MANAGER } from '@/lib/types';
 import { useSession } from '@/hooks/useSession';
 import { useRoles } from '@/hooks/useRoles';
 import { useRoleTasks } from '@/hooks/useTasks';
@@ -44,10 +44,13 @@ export default function TeamMemberPage() {
   const roleLabelByKey = Object.fromEntries(roles.map((r) => [r.key, r.label]));
   const targetRole = roles.find((r) => r.key === targetRoleKey);
 
-  const isTopLevel = user.role.key === 'owner';
+  const isOwner = user.role.key === 'owner';
+  const isOpsManager = user.role.key === 'ops_manager';
+  const isTopLevel = isOwner || isOpsManager;
   const isSelf = user.role.key === targetRoleKey;
   const manages = (ASSIGNABLE_ROLES[user.role.key] ?? []).includes(targetRoleKey);
-  const canView = isTopLevel || isSelf || manages;
+  const blockedForOpsManager = isOpsManager && HIDDEN_FROM_OPS_MANAGER.includes(targetRoleKey);
+  const canView = !blockedForOpsManager && (isTopLevel || isSelf || manages);
 
   const selectedTask = selectedTaskId ? tasksQuery.data?.find((t) => t.id === selectedTaskId) ?? null : null;
   const handleMove = (taskId: number, status: TaskStatus) => updateStatus.mutate({ taskId, status });
