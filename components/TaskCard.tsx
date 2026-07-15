@@ -41,10 +41,11 @@ export function TaskCard({
       )}
 
       <div className="flex items-center justify-between mt-2">
-        <span className="flex items-center gap-1.5 text-[11.5px] text-muted font-mono">
-          <span className={`w-1.5 h-1.5 rounded-full ${accent.bg}`} />
+        <span className="flex items-center gap-1.5 text-[11px] text-muted font-mono truncate">
+          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${accent.bg}`} />
+          <span className="truncate">{task.assignedToEmployee?.name ?? 'Unassigned'}</span>
         </span>
-        <span className={`flex items-center gap-1 text-[11px] font-mono ${overdue ? 'text-danger' : 'text-faint'}`}>
+        <span className={`flex items-center gap-1 text-[11px] font-mono shrink-0 ${overdue ? 'text-danger' : 'text-faint'}`}>
           {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />} {fmtDate(task.dueDate)}
         </span>
       </div>

@@ -110,7 +110,7 @@ export default function TeamMemberPage() {
 
       {selectedTask && (
         <TaskModal
-          task={selectedTask} currentRoleKey={user.role.key} roleLabelByKey={roleLabelByKey}
+          task={selectedTask} currentRoleKey={user.role.key} currentEmployeeId={user.employeeId} roleLabelByKey={roleLabelByKey}
           onClose={() => setSelectedTaskId(null)}
         />
       )}

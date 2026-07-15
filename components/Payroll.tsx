@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Play, Plus, Trash2 } from 'lucide-react';
 import type { PayrollEntry } from '@/lib/types';
 import { PAYROLL_CATEGORY_LABEL } from '@/lib/types';
-import { useEmployees } from '@/hooks/useEmployees';
+import { useAllEmployeesForPicker } from '@/hooks/useEmployees';
 import { usePayroll, useDeletePayrollEntry } from '@/hooks/usePayroll';
 import { RunPayrollModal } from './RunPayrollModal';
 import { AddPayrollEntryModal } from './AddPayrollEntryModal';
@@ -76,7 +76,7 @@ export function Payroll() {
   const [period, setPeriod] = useState(currentPeriod());
   const [showRun, setShowRun] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
-  const employeesQuery = useEmployees();
+  const employeesQuery = useAllEmployeesForPicker();
   const payrollQuery = usePayroll({ period });
   const deleteEntry = useDeletePayrollEntry();
 

@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callPhpApi, PhpApiError } from '@/lib/serverApi';
 import { getSessionToken } from '@/lib/session';
-import type { Employee } from '@/lib/types';
+import type { Employee, PaginatedEnvelope } from '@/lib/types';
 
-export async function GET() {
+export interface EmployeesPage extends PaginatedEnvelope {
+  employees: Employee[];
+}
+
+export async function GET(req: NextRequest) {
   const token = getSessionToken();
   if (!token) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   }
 
+  const role = req.nextUrl.searchParams.get('role');
+
   try {
-    const data = await callPhpApi<{ employees: Employee[] }>('/employees', { token });
+    const searchParams: Record<string, string> = role
+      ? { role }
+      : { page: req.nextUrl.searchParams.get('page') ?? '1', limit: req.nextUrl.searchParams.get('limit') ?? '25' };
+    const data = await callPhpApi<EmployeesPage>('/employees', { token, searchParams });
     return NextResponse.json(data);
   } catch (e) {
     const status = e instanceof PhpApiError ? e.status : 500;

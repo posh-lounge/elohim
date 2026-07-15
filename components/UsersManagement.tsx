@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, KeyRound, Power, Loader2 } from 'lucide-react';
+import { UserPlus, KeyRound, Power, Loader2, ChevronDown } from 'lucide-react';
 import type { ManagedUser, Role, RoleKey } from '@/lib/types';
 import { useUsers, useUpdateUser } from '@/hooks/useUsers';
 import { ROLE_ACCENT } from '@/lib/roleDisplay';
@@ -19,6 +19,9 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
   const [resetTarget, setResetTarget] = useState<ManagedUser | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
+  const users = usersQuery.data?.pages.flatMap((p) => p.users) ?? [];
+  const total = usersQuery.data?.pages[0]?.total ?? 0;
+
   const toggleActive = (u: ManagedUser) => {
     setBusyId(u.id);
     updateUser.mutate({ id: u.id, isActive: !u.isActive }, { onSettled: () => setBusyId(null) });
@@ -34,7 +37,7 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <div className="text-[13px] text-muted">
-          {usersQuery.data ? `${usersQuery.data.length} accounts` : 'Loading…'}
+          {usersQuery.data ? `${users.length} of ${total} accounts` : 'Loading…'}
         </div>
         <button
           onClick={() => setShowAdd(true)}
@@ -58,7 +61,7 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
               </tr>
             </thead>
             <tbody>
-              {usersQuery.data.map((u) => {
+              {users.map((u) => {
                 const accent = ROLE_ACCENT[u.role.key];
                 const isBusy = busyId === u.id;
                 return (
@@ -98,6 +101,17 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {usersQuery.hasNextPage && (
+        <button
+          onClick={() => usersQuery.fetchNextPage()} disabled={usersQuery.isFetchingNextPage}
+          className="w-full flex items-center justify-center gap-1.5 mt-3 py-2.5 rounded-lg border border-border text-muted text-xs disabled:opacity-50"
+        >
+          {usersQuery.isFetchingNextPage
+            ? <><Loader2 size={13} className="animate-spin" /> Loading…</>
+            : <><ChevronDown size={13} /> Load more</>}
+        </button>
       )}
 
       {showAdd && <AddUserModal roles={roles} onClose={() => setShowAdd(false)} />}

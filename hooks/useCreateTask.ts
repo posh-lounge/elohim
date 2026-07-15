@@ -9,6 +9,7 @@ export interface NewTaskInput {
   title: string;
   description?: string;
   assignedToRole: RoleKey;
+  employeeId: number;
   responsibilityId: number;
   priority: Priority;
   dueDate?: string | null;

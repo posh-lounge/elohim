@@ -45,8 +45,16 @@ export interface Task {
   createdAt: string;
   assignedToRole: RoleKey;
   assignedByRole: RoleKey;
+  assignedToEmployee: { id: number; name: string } | null;
   responsibility: RoleContentItem | null;
   updates: TaskUpdate[];
+}
+
+export interface PaginatedEnvelope {
+  page: number;
+  limit: number;
+  total: number;
+  hasMore: boolean;
 }
 
 export interface SessionUser {
@@ -54,6 +62,7 @@ export interface SessionUser {
   name: string;
   email: string;
   role: { key: RoleKey; label: string };
+  employeeId: number | null;
 }
 
 export interface ManagedUser {
@@ -194,4 +203,11 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
   personal_assistant: [],
   accountant: [],
 };
-export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['personal_assistant', 'owner'];
+
+// Mirrors backend/handlers/tasks_handler.php's HIDDEN_FROM_OPS_MANAGER — the
+// Operations Manager oversees the four department heads, not the Owner's
+// own work or the Personal Assistant's. Used here only to drive the UI
+// (skip a doomed fetch, show the same clean "no visibility" message as any
+// other unauthorized case); the backend re-checks this on every request
+// regardless.
+export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner', 'personal_assistant'];

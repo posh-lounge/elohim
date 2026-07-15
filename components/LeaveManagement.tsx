@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CalendarPlus, Check, X as XIcon, Loader2 } from 'lucide-react';
+import { CalendarPlus, Check, X as XIcon, Loader2, ChevronDown } from 'lucide-react';
 import type { LeaveRequest, RoleKey, TaskScope } from '@/lib/types';
 import { ASSIGNABLE_ROLES } from '@/lib/types';
 import { useLeaveRequests, useDecideLeaveRequest } from '@/hooks/useLeave';
@@ -24,6 +24,7 @@ export function LeaveManagement({ currentUserId, currentRoleKey, roleLabelByKey,
   const [scope, setScope] = useState<TaskScope>('my');
   const [showNew, setShowNew] = useState(false);
   const requestsQuery = useLeaveRequests(scope);
+  const requests = requestsQuery.data?.pages.flatMap((p) => p.requests) ?? [];
   const decide = useDecideLeaveRequest();
   const [busyId, setBusyId] = useState<number | null>(null);
 
@@ -63,13 +64,13 @@ export function LeaveManagement({ currentUserId, currentRoleKey, roleLabelByKey,
       </div>
 
       {requestsQuery.isLoading && <div className="text-sm text-faint py-8">Loading requests…</div>}
-      {requestsQuery.data && requestsQuery.data.length === 0 && (
+      {requestsQuery.data && requests.length === 0 && (
         <div className="text-[13px] text-faint py-8">Nothing here yet.</div>
       )}
 
-      {requestsQuery.data && requestsQuery.data.length > 0 && (
+      {requests.length > 0 && (
         <div className="flex flex-col gap-2.5">
-          {requestsQuery.data.map((req) => {
+          {requests.map((req) => {
             const isBusy = busyId === req.id;
             return (
               <div key={req.id} className="bg-surface border border-border rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
@@ -99,6 +100,17 @@ export function LeaveManagement({ currentUserId, currentRoleKey, roleLabelByKey,
             );
           })}
         </div>
+      )}
+
+      {requestsQuery.hasNextPage && (
+        <button
+          onClick={() => requestsQuery.fetchNextPage()} disabled={requestsQuery.isFetchingNextPage}
+          className="w-full flex items-center justify-center gap-1.5 mt-3 py-2.5 rounded-lg border border-border text-muted text-xs disabled:opacity-50"
+        >
+          {requestsQuery.isFetchingNextPage
+            ? <><Loader2 size={13} className="animate-spin" /> Loading…</>
+            : <><ChevronDown size={13} /> Load more</>}
+        </button>
       )}
 
       {showNew && <NewLeaveRequestModal onClose={() => setShowNew(false)} />}

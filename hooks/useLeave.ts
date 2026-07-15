@@ -1,15 +1,19 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiRequest } from '@/lib/clientApi';
-import type { LeaveRequest, LeaveStatus, TaskScope } from '@/lib/types';
+import type { LeaveStatus, TaskScope } from '@/lib/types';
+import type { LeavePage } from '@/app/api/leave/route';
+
+const PAGE_SIZE = 25;
 
 export function useLeaveRequests(scope: TaskScope) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['leave', scope],
-    queryFn: () => apiRequest<{ requests: LeaveRequest[] }>(`/api/leave?scope=${scope}`),
-    select: (data) => data.requests,
+    queryFn: ({ pageParam }) => apiRequest<LeavePage>(`/api/leave?scope=${scope}&page=${pageParam}&limit=${PAGE_SIZE}`),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined),
   });
 }
 

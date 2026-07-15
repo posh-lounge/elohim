@@ -1,17 +1,20 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiRequest } from '@/lib/clientApi';
-import type { ManagedUser, RoleKey } from '@/lib/types';
+import type { RoleKey } from '@/lib/types';
+import type { UsersPage } from '@/app/api/users/route';
 
 const USERS_KEY = ['users'];
+const PAGE_SIZE = 25;
 
 export function useUsers() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: USERS_KEY,
-    queryFn: () => apiRequest<{ users: ManagedUser[] }>('/api/users'),
-    select: (data) => data.users,
+    queryFn: ({ pageParam }) => apiRequest<UsersPage>(`/api/users?page=${pageParam}&limit=${PAGE_SIZE}`),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined),
   });
 }
 
@@ -28,6 +31,7 @@ export function useCreateUser() {
     mutationFn: (input: NewUserInput) => apiRequest<{ id: number }>('/api/users', { method: 'POST', body: input }),
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: USERS_KEY });
+      queryClient.invalidateQueries({ queryKey: ['employees'] }); // creating a user also creates a linked employee
       toast.success(`${input.name} added`, { description: `Can now sign in as ${input.roleKey.replace('_', ' ')}.` });
     },
     onError: (err) => toast.error('Could not add user', { description: (err as Error).message }),

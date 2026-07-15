@@ -172,12 +172,12 @@ export function Dashboard() {
 
       {selectedTask && (
         <TaskModal
-          task={selectedTask} currentRoleKey={user.role.key} roleLabelByKey={roleLabelByKey}
+          task={selectedTask} currentRoleKey={user.role.key} currentEmployeeId={user.employeeId} roleLabelByKey={roleLabelByKey}
           onClose={() => setSelectedTaskId(null)}
         />
       )}
       {showNewTask && (
-        <NewTaskModal options={newTaskOptions} roles={roles} roleLabelByKey={roleLabelByKey} onClose={() => setShowNewTask(false)} />
+        <NewTaskModal options={newTaskOptions} roleLabelByKey={roleLabelByKey} onClose={() => setShowNewTask(false)} />
       )}
       {showAccount && <AccountModal userName={user.name} onClose={() => setShowAccount(false)} />}
     </div>

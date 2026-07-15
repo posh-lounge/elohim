@@ -16,16 +16,18 @@ const STATUS_COLUMNS: { key: TaskStatus; label: string }[] = [
 ];
 
 export function TaskModal({
-  task, currentRoleKey, roleLabelByKey, onClose,
+  task, currentRoleKey, currentEmployeeId, roleLabelByKey, onClose,
 }: {
-  task: Task; currentRoleKey: RoleKey; roleLabelByKey: Record<string, string>; onClose: () => void;
+  task: Task; currentRoleKey: RoleKey; currentEmployeeId: number | null; roleLabelByKey: Record<string, string>; onClose: () => void;
 }) {
   const [note, setNote] = useState('');
   const [progress, setProgress] = useState(task.updates.length ? task.updates[task.updates.length - 1].progress : 25);
   const updateStatus = useUpdateTaskStatus();
   const addUpdate = useAddTaskUpdate();
 
-  const canReport = task.assignedToRole === currentRoleKey;
+  const canReport = task.assignedToEmployee
+    ? task.assignedToEmployee.id === currentEmployeeId
+    : task.assignedToRole === currentRoleKey; // legacy/unclaimed task fallback
   const overdue = isOverdue(task.status, task.dueDate);
 
   const submit = () => {
@@ -40,7 +42,9 @@ export function TaskModal({
           <div>
             <div className="flex gap-2 items-center mb-1.5">
               <PriorityStamp priority={task.priority} />
-              <span className="text-[11.5px] text-muted font-mono">{roleLabelByKey[task.assignedToRole]}</span>
+              <span className="text-[11.5px] text-muted font-mono">
+                {task.assignedToEmployee?.name ?? 'Unassigned'} · {roleLabelByKey[task.assignedToRole]}
+              </span>
             </div>
             <div className="font-display text-lg font-semibold">{task.title}</div>
             {task.responsibility && (
@@ -56,7 +60,7 @@ export function TaskModal({
           <div className="flex gap-5 flex-wrap mb-4 text-xs">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-wide text-faint">Assigned to</div>
-              <div className="mt-1">{roleLabelByKey[task.assignedToRole]}</div>
+              <div className="mt-1">{task.assignedToEmployee?.name ?? 'Unassigned'} <span className="text-faint">({roleLabelByKey[task.assignedToRole]})</span></div>
             </div>
             <div>
               <div className="font-mono text-[10px] uppercase tracking-wide text-faint">Assigned by</div>
@@ -119,7 +123,7 @@ export function TaskModal({
             </div>
           ) : (
             <div className="text-[11.5px] text-faint border-t border-border-soft pt-3">
-              Only {roleLabelByKey[task.assignedToRole]} can post progress reports on this task.
+              Only {task.assignedToEmployee?.name ?? roleLabelByKey[task.assignedToRole]} can post progress reports on this task.
             </div>
           )}
         </div>
