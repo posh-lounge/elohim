@@ -44,7 +44,7 @@ export default function TeamMemberPage() {
   const roleLabelByKey = Object.fromEntries(roles.map((r) => [r.key, r.label]));
   const targetRole = roles.find((r) => r.key === targetRoleKey);
 
-  const isTopLevel = user.role.key === 'owner' || user.role.key === 'ops_manager';
+  const isTopLevel = user.role.key === 'owner';
   const isSelf = user.role.key === targetRoleKey;
   const manages = (ASSIGNABLE_ROLES[user.role.key] ?? []).includes(targetRoleKey);
   const canView = isTopLevel || isSelf || manages;
