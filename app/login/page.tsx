@@ -52,9 +52,7 @@ function LoginForm() {
         <LogIn size={15} /> {login.isPending ? 'Signing in…' : 'Sign in'}
       </button>
 
-      <div className="mt-5 text-[11px] text-faint leading-relaxed">
-        Demo accounts (seed_users.php): any address like <span className="text-muted">ops@elohimgroup.rw</span>, password <span className="text-muted">password123</span>.
-      </div>
+      
     </form>
   );
 }
