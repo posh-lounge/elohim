@@ -7,8 +7,8 @@ import { X, Plus, ExternalLink, Trash2 } from 'lucide-react';
 const COMMON_LINK_TEMPLATES: { id: string; name: string; url: string }[] = [
   { id: 'N Residential', name: 'N Residential System', url: 'https://hub.nresidentialsuites.com' },
   { id: 'Elohim Website', name: 'Elohim Website', url: 'https://www.elohimgroupltd.com' },
-  { id: 'Elohim System', name: 'Elohim System', url: 'https://hub.admin.elohimgroupltd.com' },
-  { id: 'P conn system', name: 'P Conn System', url: 'https://pa.nresidentialsuites.com' },
+  { id: 'Elohim System', name: 'Elohim System', url: 'https://admin.elohimgroupltd.com' },
+  { id: 'P conn system', name: 'P Conn System', url: 'https://pa.elohimgroupltd.com' },
   // add more shared systems here
 ];
 
