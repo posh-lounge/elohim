@@ -4,6 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "mine";
+    src: url("/static/Poppins-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+  }
+  
+  h1, h2, h3, h4, h5, h6, p, span, a, button, body, ul, li, input, Link, div , section{
+    font-family: 'mine', sans-serif;
+  }
+  .btnumubyeyi {
+    background-color: #22a6c2 !important;
+  }
+
+
 :root {
   --bg: #12151b;
   --surface: #1a1e27;
