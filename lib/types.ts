@@ -138,7 +138,7 @@ export interface Employee {
 
 export type PayrollCategory =
   | 'base_salary' | 'bonus' | 'loan' | 'advance'
-  | 'rssb_paye' | 'rssb_maternity' | 'rssb_mutuelle' | 'rssb_pension' | 'rssb_pension_employer' | 'other';
+  | 'rssb_paye' | 'rssb_maternity_employer' | 'rssb_maternity' | 'rssb_mutuelle' | 'rssb_pension' | 'rssb_pension_employer' | 'other';
 
 export interface PayrollEntry {
   id: number;
@@ -160,6 +160,7 @@ export const PAYROLL_CATEGORY_LABEL: Record<PayrollCategory, string> = {
   loan: 'Loan',
   advance: 'Advance',
   rssb_paye: 'RSSB — PAYE',
+  rssb_maternity_employer: 'RSSB — Maternity (employer)',
   rssb_maternity: 'RSSB — Maternity (employer)',
   rssb_mutuelle: 'RSSB — CBHI (Mutuelle)',
   rssb_pension: 'RSSB — Pension (employee)',

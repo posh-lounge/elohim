@@ -10,10 +10,7 @@
   }
   
   h1, h2, h3, h4, h5, h6, p, span, a, button, body, ul, li, input, Link, div , section{
-    font-family: 'mine', sans-serif;
-  }
-  .btnumubyeyi {
-    background-color: #22a6c2 !important;
+    font-family: 'mine', sans-serif !important;
   }
 
 
