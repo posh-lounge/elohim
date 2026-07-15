@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Plus, Loader2, UserCog } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCog, Link2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { RoleKey, TaskScope, TaskStatus } from '@/lib/types';
 import { ASSIGNABLE_ROLES } from '@/lib/types';
@@ -22,6 +22,8 @@ import { LeaveManagement } from './LeaveManagement';
 import { ActivityLog } from './ActivityLog';
 import { EmployeeRegistry } from './EmployeeRegistry';
 import { Payroll } from './Payroll';
+import { SystemLinksModal } from './SystemLinksModal';
+
 
 type DashboardTab = TaskScope | 'users' | 'directory' | 'kpis' | 'leave' | 'activity' | 'employees' | 'payroll';
 
@@ -36,6 +38,7 @@ export function Dashboard() {
   const [showNewTask, setShowNewTask] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
   const updateStatus = useUpdateTaskStatus();
+  const [showLinks, setShowLinks] = useState(false);
 
   const isTaskTab = activeTab === 'my' || activeTab === 'team' || activeTab === 'all';
   const tasksQuery = useTasks(isTaskTab ? activeTab : 'my');
@@ -59,7 +62,7 @@ export function Dashboard() {
   const roleLabelByKey = Object.fromEntries(roles.map((r) => [r.key, r.label]));
   const currentRole = roles.find((r) => r.key === user.role.key);
   const assignable = ASSIGNABLE_ROLES[user.role.key] ?? [];
-  const canAssign = assignable.length > 0;
+  const canAssign = 1 + assignable.length > 1;
   const isTopLevel = user.role.key === 'owner' || user.role.key === 'ops_manager';
   const isOwner = user.role.key === 'owner';
   const isAccountant = user.role.key === 'accountant';
@@ -92,6 +95,10 @@ export function Dashboard() {
             <div>
               <div className="font-display text-xl font-bold tracking-wide">ELOHIM GROUP</div>
               <div className="font-mono text-[10.5px] text-faint tracking-widest mt-0.5">OPERATIONS CONSOLE</div>
+              <button
+  onClick={() => setShowLinks(true)}
+  className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs"
+><Link2 size={13} /> Links</button>
             </div>
             <div className="flex items-center gap-2.5">
               <button
@@ -105,7 +112,7 @@ export function Dashboard() {
                 </div>
                 <UserCog size={16} className="text-faint" />
               </button>
-              {canAssign && isTaskTab && (
+              {isTaskTab && (
                 <button
                   onClick={() => setShowNewTask(true)}
                   className="flex items-center gap-1.5 bg-gold border-none text-[#1A1408] rounded-lg px-3 py-1.5 text-xs font-bold"
@@ -176,6 +183,7 @@ export function Dashboard() {
           onClose={() => setSelectedTaskId(null)}
         />
       )}
+      {showLinks && (<SystemLinksModal  onClose={() => setShowLinks(false)} />)}
       {showNewTask && (
         <NewTaskModal options={newTaskOptions} roleLabelByKey={roleLabelByKey} onClose={() => setShowNewTask(false)} />
       )}

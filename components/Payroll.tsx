@@ -58,7 +58,7 @@ function EmployeePayrollCard({ employeeName, entries, onDelete }: {
       </div>
 
       {employerCosts > 0 && (
-        <div className="text-[10.5px] text-faint bg-surface-alt rounded-lg px-2.5 py-2">
+        <div className="text-lg text-white bg-surface-alt rounded-lg px-2.5 py-2">
           <div className="uppercase tracking-wide font-mono mb-1">Employer cost (not deducted from employee)</div>
           {entries.filter((e) => e.direction === 'employer_cost').map((e) => (
             <div key={e.id} className="flex justify-between">
