@@ -7,6 +7,8 @@ import { ROLE_ACCENT } from '@/lib/roleDisplay';
 import { PriorityStamp, ProgressBar, fmtDate, isOverdue, timeAgo } from './primitives';
 import { useUpdateTaskStatus } from '@/hooks/useUpdateTaskStatus';
 import { useAddTaskUpdate } from '@/hooks/useAddTaskUpdate';
+import { useTaskComments } from '@/hooks/useTaskComments';      // NEW
+import { useAddTaskComment } from '@/hooks/useAddTaskComment';  // NEW
 
 const STATUS_COLUMNS: { key: TaskStatus; label: string }[] = [
   { key: 'todo', label: 'To Do' },
@@ -22,17 +24,28 @@ export function TaskModal({
 }) {
   const [note, setNote] = useState('');
   const [progress, setProgress] = useState(task.updates.length ? task.updates[task.updates.length - 1].progress : 25);
+  const [comment, setComment] = useState(''); // NEW
+
   const updateStatus = useUpdateTaskStatus();
   const addUpdate = useAddTaskUpdate();
+  const { data: commentsData } = useTaskComments(task.id); // NEW
+  const addComment = useAddTaskComment(); // NEW
 
   const canReport = task.assignedToEmployee
     ? task.assignedToEmployee.id === currentEmployeeId
     : task.assignedToRole === currentRoleKey; // legacy/unclaimed task fallback
   const overdue = isOverdue(task.status, task.dueDate);
 
+  const canComment = currentRoleKey === 'ops_manager' || currentRoleKey === 'owner'; // NEW
+
   const submit = () => {
     if (!note.trim()) return;
     addUpdate.mutate({ taskId: task.id, note: note.trim(), progress }, { onSuccess: () => setNote('') });
+  };
+
+  const submitComment = () => { // NEW
+    if (!comment.trim()) return;
+    addComment.mutate({ taskId: task.id, comment: comment.trim() }, { onSuccess: () => setComment('') });
   };
 
   return (
@@ -126,6 +139,37 @@ export function TaskModal({
               Only {task.assignedToEmployee?.name ?? roleLabelByKey[task.assignedToRole]} can post progress reports on this task.
             </div>
           )}
+
+          {/* ---- NEW: Comments section ---- */}
+          <div className="border-t border-border-soft pt-3.5 mt-3">
+            <div className="font-mono text-[10.5px] uppercase tracking-wider text-gold mb-2">Comments</div>
+            {commentsData?.comments?.map((c) => (
+              <div key={c.id} className="bg-surface-alt border border-border-soft rounded-lg px-3 py-2.5 mb-2">
+                <div className="flex justify-between mb-1">
+                  <span className="text-[11.5px] font-semibold">{c.authorName} <span className="text-faint">({roleLabelByKey[c.authorRole]})</span></span>
+                  <span className="text-[10.5px] text-faint font-mono">{timeAgo(c.createdAt)}</span>
+                </div>
+                <div className="text-xs text-muted leading-relaxed">{c.comment}</div>
+              </div>
+            ))}
+            {commentsData?.comments?.length === 0 && (
+              <div className="text-xs text-faint">No comments yet.</div>
+            )}
+            {canComment && (
+              <div className="mt-2">
+                <textarea
+                  value={comment} onChange={(e) => setComment(e.target.value)}
+                  placeholder="Add a comment (visible to all)"
+                  rows={2} className="w-full bg-surface-alt border border-border rounded-lg px-3 py-2 text-[12.5px] resize-y"
+                />
+                <button
+                  onClick={submitComment}
+                  disabled={!comment.trim() || addComment.isPending}
+                  className="mt-1 bg-gold text-[#1A1408] font-bold rounded-md px-3 py-1.5 text-xs disabled:opacity-40"
+                >{addComment.isPending ? 'Posting…' : 'Post comment'}</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

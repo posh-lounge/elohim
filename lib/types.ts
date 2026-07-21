@@ -192,7 +192,7 @@ export type TaskScope = 'my' | 'team' | 'all';
 // manager who wants work done outside their own direct reports routes
 // it through the person who actually manages that role.
 export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
-  owner: ['ops_manager'],
+  owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator'],
   ops_manager: [ 'personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator'],
   bar_manager: [],
   apartment_manager: [],
