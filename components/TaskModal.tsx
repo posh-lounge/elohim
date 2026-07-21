@@ -46,8 +46,7 @@ export function TaskModal({
 
   const canReport = task.assignedToEmployee
     ? task.assignedToEmployee.id === currentEmployeeId
-    : task.assignedToRole === currentRoleKey; // legacy/unclaimed task fallback
-
+    : task.assignedToRole === currentRoleKey;
   const overdue = isOverdue(task.status, task.dueDate);
   const canComment = currentRoleKey === 'ops_manager' || currentRoleKey === 'owner';
 
@@ -249,18 +248,18 @@ export function TaskModal({
             {commentsData?.comments?.length === 0 && (
               <div className="text-xs text-faint">No comments yet.</div>
             )}
-            {commentsData?.comments?.map((c) => (
+            {commentsData?.comments?.map((c: any) => (
               <div
                 key={c.id}
                 className="bg-surface-alt border border-border-soft rounded-lg px-3 py-2.5 mb-2"
               >
                 <div className="flex justify-between mb-1">
                   <span className="text-[11.5px] font-semibold">
-                    {c.authorName}{' '}
-                    <span className="text-faint">({roleLabelByKey[c.authorRole]})</span>
+                    {c.author_name}{' '}
+                    <span className="text-faint">({roleLabelByKey[c.author_role]})</span>
                   </span>
                   <span className="text-[10.5px] text-faint font-mono">
-                    {timeAgo(c.createdAt)}
+                    {timeAgo(c.created_at)}
                   </span>
                 </div>
                 <div className="text-xs text-muted leading-relaxed">{c.comment}</div>
