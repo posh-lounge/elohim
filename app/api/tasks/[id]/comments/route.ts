@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { callPhpApi, PhpApiError } from '@/lib/serverApi';
 import { getSessionToken } from '@/lib/session';
-
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const token = getSessionToken();
-  if (!token) {
-    return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
-  }
+  if (!token) return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
 
   try {
     const data = await callPhpApi<{ comments: any[] }>(`/tasks/${params.id}/comments`, { method: 'GET', token });
