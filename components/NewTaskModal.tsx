@@ -6,7 +6,7 @@ import { X, Plus, Loader2 } from 'lucide-react';
 import type { Priority, RoleKey } from '@/lib/types';
 import { useCreateTask } from '@/hooks/useCreateTask';
 import { useEmployeesByRole } from '@/hooks/useEmployees';
-import { useEmployeeResponsibilities, useCopyRoleResponsibilities } from '@/hooks/useEmployeeResponsibilities';
+import { useEmployeeResponsibilities } from '@/hooks/useEmployeeResponsibilities';
 
 export function NewTaskModal({
   options,
@@ -26,42 +26,20 @@ export function NewTaskModal({
   const [dueDate, setDueDate] = useState('');
 
   const createTask = useCreateTask();
-  const copyFromRole = useCopyRoleResponsibilities();
-
   const employeesQuery = useEmployeesByRole(assignedToRole);
   const responsibilitiesQuery = useEmployeeResponsibilities(employeeId);
 
-  // ── Auto‑pick the only employee in a role ──
+  // Auto‑pick the only employee in a role
   useEffect(() => {
     if (employeesQuery.data && employeesQuery.data.length === 1 && employeeId === null) {
       setEmployeeId(employeesQuery.data[0].id);
     }
   }, [employeesQuery.data, employeeId]);
 
-  // ── Reset responsibility when employee changes ──
+  // Reset responsibility when employee changes
   useEffect(() => {
     setResponsibilityId(null);
   }, [employeeId]);
-
-  // ── 🔥 AUTO‑COPY: if the selected employee has no personal responsibilities,
-  //     copy them from the role template automatically ──
-  useEffect(() => {
-    if (
-      employeeId !== null &&
-      responsibilitiesQuery.data !== undefined &&
-      responsibilitiesQuery.data.length === 0 &&
-      !copyFromRole.isPending &&
-      !copyFromRole.isSuccess
-    ) {
-      copyFromRole.mutate(employeeId);
-    }
-  }, [
-    employeeId,
-    responsibilitiesQuery.data,
-    copyFromRole.isPending,
-    copyFromRole.isSuccess,
-    copyFromRole.mutate,
-  ]);
 
   const changeRole = (rid: RoleKey) => {
     setAssignedToRole(rid);
@@ -172,58 +150,46 @@ export function NewTaskModal({
             )}
           </div>
 
-          {/* Responsibility picker – with auto‑copy in the background */}
+          {/* Responsibility picker – strictly employee's personal list */}
           {employeeId !== null && (
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className={`${label} mb-0`}>
-                  Which responsibility is this for?
-                </label>
-                {/* Manual copy button is still there as a fallback,
-                    but the auto‑copy above will usually make it unnecessary */}
-                {responsibilitiesQuery.data &&
-                  responsibilitiesQuery.data.length === 0 &&
-                  !copyFromRole.isPending && (
-                    <button
-                      onClick={() => copyFromRole.mutate(employeeId)}
-                      disabled={copyFromRole.isPending}
-                      className="text-[10.5px] text-gold flex items-center gap-1 disabled:opacity-50"
-                    >
-                      {copyFromRole.isPending ? (
-                        <Loader2 size={10} className="animate-spin" />
-                      ) : null}
-                      Copy from role template
-                    </button>
-                  )}
-              </div>
+              <label className={label}>Which responsibility is this for?</label>
 
-              {responsibilitiesQuery.isLoading || copyFromRole.isPending ? (
+              {responsibilitiesQuery.isLoading ? (
                 <div className="text-[11.5px] text-faint flex items-center gap-1.5">
                   <Loader2 size={12} className="animate-spin" />
                   Loading responsibilities…
                 </div>
-              ) : responsibilitiesQuery.data && responsibilitiesQuery.data.length === 0 ? (
-                <div className="text-[10.5px] text-faint bg-surface-alt border border-border-soft rounded-lg px-3 py-2">
-                  This person has no responsibilities yet – they will be copied from the role
-                  template automatically.
-                </div>
               ) : (
-                <select
-                  value={responsibilityId ?? ''}
-                  onChange={(e) =>
-                    setResponsibilityId(e.target.value ? Number(e.target.value) : null)
-                  }
-                  className={field}
-                >
-                  <option value="" disabled>
-                    Select one…
-                  </option>
-                  {responsibilitiesQuery?.data?.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.text}
-                    </option>
-                  ))}
-                </select>
+                <>
+                  {responsibilitiesQuery.data && responsibilitiesQuery.data.length > 0 ? (
+                    <select
+                      value={responsibilityId ?? ''}
+                      onChange={(e) =>
+                        setResponsibilityId(e.target.value ? Number(e.target.value) : null)
+                      }
+                      className={field}
+                    >
+                      <option value="" disabled>
+                        Select one…
+                      </option>
+                      {responsibilitiesQuery.data.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.text}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="text-[10.5px] text-faint bg-surface-alt border border-border-soft rounded-lg px-3 py-2">
+                      This employee has no personal responsibilities yet.
+                      <br />
+                      <Link href="/employees" className="text-gold underline">
+                        Add responsibilities in the Employees tab
+                      </Link>
+                      .
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
