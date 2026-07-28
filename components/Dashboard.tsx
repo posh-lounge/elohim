@@ -187,7 +187,14 @@ export function Dashboard() {
       {showNewTask && (
         <NewTaskModal options={newTaskOptions} roleLabelByKey={roleLabelByKey} onClose={() => setShowNewTask(false)} />
       )}
-      {showAccount && <AccountModal userName={user.name} onClose={() => setShowAccount(false)} />}
+     {showAccount && (
+  <AccountModal
+    userName={user.name}
+    userEmail={user.email}
+    userPhone={user.phone ?? ''}
+    onClose={() => setShowAccount(false)}
+  />
+)}
     </div>
   );
 }

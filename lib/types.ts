@@ -59,6 +59,7 @@ export interface SessionUser {
   id: number;
   name: string;
   email: string;
+  phone: string;
   role: { key: RoleKey; label: string };
   employeeId: number | null;
 }

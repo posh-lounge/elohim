@@ -61,3 +61,17 @@ export function useChangePassword() {
     onError: (err) => toast.error('Could not change password', { description: (err as Error).message }),
   });
 }
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { currentPassword: string; name?: string; email?: string; phone?: string; newPassword?: string }) =>
+      apiRequest<{ ok: boolean }>('/api/auth/profile', { method: 'PATCH', body: input }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['session'] });
+      const changed = ['name', 'email', 'phone', 'newPassword'].filter(f => f in vars);
+      toast.success('Profile updated', { description: `Updated: ${changed.join(', ')}` });
+    },
+    onError: (err) => toast.error('Update failed', { description: (err as Error).message }),
+  });
+}
