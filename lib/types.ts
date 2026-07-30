@@ -46,6 +46,7 @@ export interface Task {
   assignedToEmployee: { id: number; name: string } | null;
   responsibility: RoleContentItem | null;
   updates: TaskUpdate[];
+  commentCount: number;
 }
 
 export interface PaginatedEnvelope {

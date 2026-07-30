@@ -57,6 +57,12 @@ export function TaskCard({
           <MessageSquare size={11} /> {task.updates.length} report{task.updates.length > 1 ? 's' : ''}
         </div>
       )}
+      {/* New: comment count */}
+{task.commentCount > 0 && (
+  <div className="flex items-center gap-1 mt-1 text-[11px] text-faint">
+    <MessageSquare size={11} /> {task.commentCount} comment{task.commentCount > 1 ? 's' : ''}
+  </div>
+)}
 
       <div className="flex justify-end gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
         <button
