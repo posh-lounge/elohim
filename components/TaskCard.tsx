@@ -63,6 +63,9 @@ export function TaskCard({
     <MessageSquare size={11} /> {task.commentCount} comment{task.commentCount > 1 ? 's' : ''}
   </div>
 )}
+{task.unreadCommentCount !== undefined && task.unreadCommentCount > 0 && (
+  <span className="ml-1 inline-block w-2 h-2 rounded-full bg-gold" title="Unread comments" />
+)}
 
       <div className="flex justify-end gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
         <button

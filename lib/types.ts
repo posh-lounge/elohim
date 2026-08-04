@@ -47,6 +47,7 @@ export interface Task {
   responsibility: RoleContentItem | null;
   updates: TaskUpdate[];
   commentCount: number;
+  unreadCommentCount?: number;  // new
 }
 
 export interface PaginatedEnvelope {

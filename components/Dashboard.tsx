@@ -23,9 +23,10 @@ import { ActivityLog } from './ActivityLog';
 import { EmployeeRegistry } from './EmployeeRegistry';
 import { Payroll } from './Payroll';
 import { SystemLinksModal } from './SystemLinksModal';
+import { NotificationBell } from './NotificationBell';
+import { AbuseReports } from './AbuseReports';
 
-
-type DashboardTab = TaskScope | 'users' | 'directory' | 'kpis' | 'leave' | 'activity' | 'employees' | 'payroll';
+type DashboardTab = TaskScope | 'users' | 'directory' | 'kpis' | 'leave' | 'activity' | 'employees' | 'payroll' | 'abuse';
 
 export function Dashboard() {
   const router = useRouter();
@@ -81,6 +82,7 @@ export function Dashboard() {
     ...(canSeeEmployees ? [{ key: 'employees' as DashboardTab, label: 'Employees' }] : []),
     ...(canSeePayroll ? [{ key: 'payroll' as DashboardTab, label: 'Payroll' }] : []),
     ...(isTopLevel ? [{ key: 'activity' as DashboardTab, label: 'Activity' }] : []),
+    ...(isOwner ? [{ key: 'abuse' as DashboardTab, label: 'Abuse Reports' }] : []),
   ];
 
   const handleMove = (taskId: number, status: TaskStatus) => updateStatus.mutate({ taskId, status });
@@ -96,11 +98,12 @@ export function Dashboard() {
               <div className="font-display text-xl font-bold tracking-wide">ELOHIM GROUP</div>
               <div className="font-mono text-[10.5px] text-faint tracking-widest mt-0.5">OPERATIONS CONSOLE</div>
               <button
-  onClick={() => setShowLinks(true)}
-  className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs"
-><Link2 size={13} /> Links</button>
+                onClick={() => setShowLinks(true)}
+                className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs"
+              ><Link2 size={13} /> Links</button>
             </div>
             <div className="flex items-center gap-2.5">
+              <NotificationBell />
               <button
                 onClick={() => setShowAccount(true)}
                 className="flex items-center gap-2 text-right mr-1 hover:opacity-80"
@@ -175,6 +178,7 @@ export function Dashboard() {
           />
         )}
         {activeTab === 'activity' && <ActivityLog />}
+        {activeTab === 'abuse' && <AbuseReports />}
       </div>
 
       {selectedTask && (
@@ -187,14 +191,14 @@ export function Dashboard() {
       {showNewTask && (
         <NewTaskModal options={newTaskOptions} roleLabelByKey={roleLabelByKey} onClose={() => setShowNewTask(false)} />
       )}
-     {showAccount && (
-  <AccountModal
-    userName={user.name}
-    userEmail={user.email}
-    userPhone={user.phone ?? ''}
-    onClose={() => setShowAccount(false)}
-  />
-)}
+      {showAccount && (
+        <AccountModal
+          userName={user.name}
+          userEmail={user.email}
+          userPhone={user.phone ?? ''}
+          onClose={() => setShowAccount(false)}
+        />
+      )}
     </div>
   );
 }
