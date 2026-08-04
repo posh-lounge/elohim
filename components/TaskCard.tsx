@@ -64,7 +64,7 @@ export function TaskCard({
   </div>
 )}
 {task.unreadCommentCount !== undefined && task.unreadCommentCount > 0 && (
-  <span className="ml-1 inline-block w-2 h-2 rounded-full bg-gold" title="Unread comments" />
+  <span className="ml-1 inline-block w-2 h-2 rounded-full bg-read">Unread comments</span>
 )}
 
       <div className="flex justify-end gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
