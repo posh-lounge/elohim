@@ -8,6 +8,7 @@ import { useAllEmployeesForPicker } from '@/hooks/useEmployees';
 import { usePayroll, useDeletePayrollEntry } from '@/hooks/usePayroll';
 import { RunPayrollModal } from './RunPayrollModal';
 import { AddPayrollEntryModal } from './AddPayrollEntryModal';
+import { PayrollSummary } from './PayrollSummary';
 
 function currentPeriod() {
   const d = new Date();
@@ -16,60 +17,6 @@ function currentPeriod() {
 
 function fmtRWF(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' RWF';
-}
-
-function PayrollSummary({ entries }: { entries: PayrollEntry[] }) {
-  const totalGross = entries
-    .filter(e => e.category === 'base_salary' && e.direction === 'earning')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalBonuses = entries
-    .filter(e => e.category === 'bonus')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalLoans = entries
-    .filter(e => e.category === 'loan')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalAdvances = entries
-    .filter(e => e.category === 'advance')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalTax = entries
-    .filter(e => e.category === 'rssb_paye')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalEarnings = entries
-    .filter(e => e.direction === 'earning')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalDeductions = entries
-    .filter(e => e.direction === 'deduction')
-    .reduce((sum, e) => sum + e.amount, 0);
-  const totalNet = totalEarnings - totalDeductions;
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-4">
-      <div className="bg-surface border border-border rounded-lg p-3">
-        <div className="text-[10px] font-mono uppercase text-faint">Gross Salary</div>
-        <div className="text-lg font-bold text-primary">{fmtRWF(totalGross)}</div>
-      </div>
-      <div className="bg-surface border border-border rounded-lg p-3">
-        <div className="text-[10px] font-mono uppercase text-faint">Bonuses</div>
-        <div className="text-lg font-bold text-success">{fmtRWF(totalBonuses)}</div>
-      </div>
-      <div className="bg-surface border border-border rounded-lg p-3">
-        <div className="text-[10px] font-mono uppercase text-faint">Loans</div>
-        <div className="text-lg font-bold text-danger">{fmtRWF(totalLoans)}</div>
-      </div>
-      <div className="bg-surface border border-border rounded-lg p-3">
-        <div className="text-[10px] font-mono uppercase text-faint">Advances</div>
-        <div className="text-lg font-bold text-danger">{fmtRWF(totalAdvances)}</div>
-      </div>
-      <div className="bg-surface border border-border rounded-lg p-3">
-        <div className="text-[10px] font-mono uppercase text-faint">Tax (PAYE)</div>
-        <div className="text-lg font-bold text-danger">{fmtRWF(totalTax)}</div>
-      </div>
-      <div className="bg-surface border border-border rounded-lg p-3 bg-gold-soft">
-        <div className="text-[10px] font-mono uppercase text-faint">Net Pay</div>
-        <div className="text-lg font-bold text-gold">{fmtRWF(totalNet)}</div>
-      </div>
-    </div>
-  );
 }
 
 function EmployeePayrollCard({ employeeName, entries, onDelete }: {
@@ -158,7 +105,6 @@ export function Payroll() {
   const deleteEntry = useDeletePayrollEntry();
 
   const entries = payrollQuery.data ?? [];
-
   const entriesByEmployee: Record<number, { name: string; entries: PayrollEntry[] }> = {};
   entries.forEach((e) => {
     if (!entriesByEmployee[e.employeeId]) entriesByEmployee[e.employeeId] = { name: e.employeeName, entries: [] };
@@ -188,22 +134,20 @@ export function Payroll() {
 
       {payrollQuery.isLoading && <div className="text-sm text-faint py-8">Loading payroll…</div>}
 
-      {payrollQuery.data && (
-        <>
-          <PayrollSummary entries={entries} />
+      {payrollQuery.data && entries.length > 0 && (
+        <PayrollSummary entries={entries} period={period} />
+      )}
 
-          {Object.keys(entriesByEmployee).length === 0 && (
-            <div className="text-[13px] text-faint py-8">No payroll entries for {period} yet — run payroll to get started.</div>
-          )}
+      {payrollQuery.data && entries.length === 0 && (
+        <div className="text-[13px] text-faint py-8">No payroll entries for {period} yet — run payroll to get started.</div>
+      )}
 
-          {Object.keys(entriesByEmployee).length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Object.entries(entriesByEmployee).map(([empId, { name, entries }]) => (
-                <EmployeePayrollCard key={empId} employeeName={name} entries={entries} onDelete={(id) => deleteEntry.mutate(id)} />
-              ))}
-            </div>
-          )}
-        </>
+      {entries.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {Object.entries(entriesByEmployee).map(([empId, { name, entries }]) => (
+            <EmployeePayrollCard key={empId} employeeName={name} entries={entries} onDelete={(id) => deleteEntry.mutate(id)} />
+          ))}
+        </div>
       )}
 
       {showRun && <RunPayrollModal employees={activeEmployees} defaultPeriod={period} onClose={() => setShowRun(false)} />}
