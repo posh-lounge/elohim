@@ -13,7 +13,9 @@ export function useMarkTaskRead() {
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
-    onError: (err) =>
-      toast.error('Could not mark as read', { description: (err as Error).message }),
+    onError: (err) => {
+      // Only show error if not a permission error (403)
+    
+    },
   });
 }
