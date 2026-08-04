@@ -61,7 +61,7 @@ export function useCreateEmployee() {
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...patch }: { id: number; employmentType?: EmploymentType; isActive?: boolean; phone?: string; email?: string; notes?: string }) =>
+    mutationFn: ({ id, ...patch }: { id: number; employmentType?: EmploymentType; isActive?: boolean; phone?: string; email?: string; notes?: string; baseSalary?: number }) =>
       apiRequest<{ ok: boolean }>(`/api/employees/${id}`, { method: 'PATCH', body: patch }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EMPLOYEES_KEY });

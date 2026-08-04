@@ -6,6 +6,11 @@ import type { Employee } from '@/lib/types';
 import { useEmployees, useUpdateEmployee } from '@/hooks/useEmployees';
 import { AddEmployeeModal } from './AddEmployeeModal';
 import { EmployeeResponsibilitiesModal } from './EmployeeResponsibilitiesModal';
+import { SalaryEditor } from './SalaryEditor';
+
+function fmtRWF(n: number) {
+  return n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' RWF';
+}
 
 function fmtDate(iso: string | null) {
   if (!iso) return '—';
@@ -17,6 +22,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
   const updateEmployee = useUpdateEmployee();
   const [showAdd, setShowAdd] = useState(false);
   const [respTarget, setRespTarget] = useState<Employee | null>(null);
+  const [salaryTarget, setSalaryTarget] = useState<Employee | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'permanent' | 'contractor'>('all');
 
@@ -65,6 +71,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                 <th className="px-4 py-2.5 font-semibold">Position</th>
                 <th className="px-4 py-2.5 font-semibold">Department</th>
                 <th className="px-4 py-2.5 font-semibold">Type</th>
+                <th className="px-4 py-2.5 font-semibold">Salary</th>
                 <th className="px-4 py-2.5 font-semibold">System access</th>
                 <th className="px-4 py-2.5 font-semibold">Hired</th>
                 <th className="px-4 py-2.5 font-semibold text-right">Actions</th>
@@ -82,6 +89,15 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                       <span className={`text-[10.5px] font-mono px-2 py-0.5 rounded-full border capitalize ${e.employmentType === 'permanent' ? 'text-success border-success' : 'text-gold border-gold'}`}>
                         {e.employmentType}
                       </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {e.baseSalary ? fmtRWF(e.baseSalary) : '—'}
+                      {canManage && (
+                        <button
+                          onClick={() => setSalaryTarget(e)}
+                          className="ml-2 text-[10px] px-2 py-0.5 rounded border border-border text-muted hover:bg-surface-alt"
+                        >Edit</button>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       {e.hasSystemAccess
@@ -124,6 +140,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
 
       {showAdd && <AddEmployeeModal onClose={() => setShowAdd(false)} />}
       {respTarget && <EmployeeResponsibilitiesModal employee={respTarget} onClose={() => setRespTarget(null)} />}
+      {salaryTarget && <SalaryEditor employee={salaryTarget} onClose={() => setSalaryTarget(null)} />}
     </div>
   );
 }

@@ -21,10 +21,33 @@ function fmtRWF(n: number) {
 function EmployeePayrollCard({ employeeName, entries, onDelete }: {
   employeeName: string; entries: PayrollEntry[]; onDelete: (id: number) => void;
 }) {
+  const statutoryCategories = [
+    'base_salary', 'rssb_pension', 'rssb_pension_employer',
+    'rssb_maternity', 'rssb_maternity_employer', 'rssb_paye', 'rssb_mutuelle'
+  ];
+  const manualCategories = ['bonus', 'loan', 'advance', 'other'];
+
+  const statutoryEntries = entries.filter(e => statutoryCategories.includes(e.category));
+  const manualEntries = entries.filter(e => manualCategories.includes(e.category));
+
   const earnings = entries.filter((e) => e.direction === 'earning').reduce((sum, e) => sum + e.amount, 0);
   const deductions = entries.filter((e) => e.direction === 'deduction').reduce((sum, e) => sum + e.amount, 0);
   const employerCosts = entries.filter((e) => e.direction === 'employer_cost').reduce((sum, e) => sum + e.amount, 0);
   const net = earnings - deductions;
+
+  const renderEntry = (e: PayrollEntry) => (
+    <div key={e.id} className="flex items-center justify-between text-[12px] group">
+      <span className="text-muted">{PAYROLL_CATEGORY_LABEL[e.category]}{e.note ? ` — ${e.note}` : ''}</span>
+      <span className="flex items-center gap-2">
+        <span className={e.direction === 'earning' ? 'text-success' : 'text-danger'}>
+          {e.direction === 'earning' ? '+' : '−'}{fmtRWF(e.amount)}
+        </span>
+        <button onClick={() => onDelete(e.id)} className="text-faint hover:text-danger opacity-0 group-hover:opacity-100">
+          <Trash2 size={12} />
+        </button>
+      </span>
+    </div>
+  );
 
   return (
     <div className="bg-surface border border-border rounded-xl p-4">
@@ -37,19 +60,19 @@ function EmployeePayrollCard({ employeeName, entries, onDelete }: {
       </div>
 
       <div className="flex flex-col gap-1.5 mb-3">
-        {entries.filter((e) => e.direction !== 'employer_cost').map((e) => (
-          <div key={e.id} className="flex items-center justify-between text-[12px] group">
-            <span className="text-muted">{PAYROLL_CATEGORY_LABEL[e.category]}{e.note ? ` — ${e.note}` : ''}</span>
-            <span className="flex items-center gap-2">
-              <span className={e.direction === 'earning' ? 'text-success' : 'text-danger'}>
-                {e.direction === 'earning' ? '+' : '−'}{fmtRWF(e.amount)}
-              </span>
-              <button onClick={() => onDelete(e.id)} className="text-faint hover:text-danger opacity-0 group-hover:opacity-100">
-                <Trash2 size={12} />
-              </button>
-            </span>
+        {statutoryEntries.length > 0 && (
+          <div>
+            <div className="text-[10px] font-mono uppercase text-faint tracking-wider mb-1">Statutory</div>
+            {statutoryEntries.map(renderEntry)}
           </div>
-        ))}
+        )}
+
+        {manualEntries.length > 0 && (
+          <div className="border-t border-border-soft pt-2 mt-2">
+            <div className="text-[10px] font-mono uppercase text-faint tracking-wider mb-1">Adjustments</div>
+            {manualEntries.map(renderEntry)}
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between text-[11px] text-faint border-t border-border-soft pt-2 font-mono mb-2">

@@ -134,6 +134,7 @@ export interface Employee {
   createdAt: string;
   roleKey: RoleKey | null;
   hasSystemAccess: boolean;
+  baseSalary?: number;        // new
 }
 
 export type PayrollCategory =
