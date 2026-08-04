@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Calendar, MessageSquare, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { AlertTriangle, BellElectric, Calendar, MessageSquare, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import type { Task, TaskStatus } from '@/lib/types';
 import { ROLE_ACCENT } from '@/lib/roleDisplay';
 import { PriorityStamp, ProgressBar, fmtDate, isOverdue } from './primitives';
@@ -64,7 +64,9 @@ export function TaskCard({
   </div>
 )}
 {task.unreadCommentCount !== undefined && task.unreadCommentCount > 0 && (
-  <span className="ml-1 inline-block w-2 h-2 rounded-full bg-red-100" title="Unread comments" />
+   <div className="flex items-center gap-1 mt-1 text-[11px] text-faint">
+    <BellElectric size={11} /> {task.unreadCommentCount} new comment{task.unreadCommentCount > 1 ? 's' : ''}
+  </div>
 )}
 
       <div className="flex justify-end gap-1.5 mt-2" onClick={(e) => e.stopPropagation()}>
