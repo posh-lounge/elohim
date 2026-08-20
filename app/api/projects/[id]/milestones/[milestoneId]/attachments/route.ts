@@ -4,7 +4,7 @@ import { getSessionToken } from '@/lib/session';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { milestoneId: string } }
 ) {
   const token = getSessionToken();
   if (!token) return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
@@ -12,7 +12,7 @@ export async function POST(
   const formData = await req.formData();
   
   try {
-    const url = `${process.env.PHP_API_URL}/milestones/${params.id}/attachments`;
+    const url = `${process.env.PHP_API_URL}/milestones/${params.milestoneId}/attachments`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
