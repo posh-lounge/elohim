@@ -118,7 +118,7 @@ export function Dashboard() {
               </button>
                <Link href="/projects"
                
-                  className="flex items-center gap-1.5 bg-green-100 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
+                  className="flex items-center gap-1.5 bg-green-600 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
                 ><FileArchive size={14} /> Projects</Link>
               {isTaskTab && (
                 <button
