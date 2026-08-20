@@ -12,7 +12,7 @@ export async function POST(
   const formData = await req.formData();
   
   try {
-    const url = `${process.env.PHP_API_URL}/milestones/${params.milestoneId}/attachments`;
+    const url = `https://elohim.giafirst.com/backend/public/milestones/${params.milestoneId}/attachments`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
