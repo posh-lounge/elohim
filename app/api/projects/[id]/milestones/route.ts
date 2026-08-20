@@ -5,7 +5,7 @@ import { getSessionToken } from '@/lib/session';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { milestoneId: string } }
+  { params }: { params: { id: string } }
 ) {
   const token = getSessionToken();
   if (!token) return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
@@ -13,7 +13,7 @@ export async function POST(
   const body = await req.json();
   try {
     const data = await callPhpApi<{ id: number }>(
-      `/projects/${params.milestoneId}/milestones`,
+      `/projects/${params.id}/milestones`,
       {
         method: 'POST',
         token,
