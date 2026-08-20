@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Plus, Loader2, UserCog, Link2 } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCog, Link2 , FileArchive } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { RoleKey, TaskScope, TaskStatus } from '@/lib/types';
 import { ASSIGNABLE_ROLES } from '@/lib/types';
@@ -115,6 +116,10 @@ export function Dashboard() {
                 </div>
                 <UserCog size={16} className="text-faint" />
               </button>
+               <Link href="/project"
+               
+                  className="flex items-center gap-1.5 bg-green-100 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
+                ><FileArchive size={14} /> Projects</Link>
               {isTaskTab && (
                 <button
                   onClick={() => setShowNewTask(true)}

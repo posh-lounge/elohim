@@ -24,6 +24,7 @@ function PersonCard({ person }: { person: DirectoryPerson }) {
           href={`/team/${person.role.key}`} title={`View ${person.role.label}'s task board`}
           className="w-7 h-7 flex items-center justify-center rounded-md border border-border text-faint hover:text-primary hover:border-gold shrink-0"
         ><ClipboardList size={13} /></Link>
+        
       </div>
       <div className="flex flex-col gap-1 text-[11.5px] text-muted">
         <a href={`mailto:${person.email}`} className="flex items-center gap-1.5 hover:text-primary truncate">
