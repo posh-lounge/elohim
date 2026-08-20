@@ -412,6 +412,7 @@ function StatusChangeModal({
     if (!milestone || !newStatus) return;
     try {
       await updateStatus.mutateAsync({
+        projectId,
         milestoneId: milestone.id,
         status: newStatus,
         comment: comment || undefined,
@@ -610,10 +611,10 @@ function MilestoneSidebar({
 
   const handleComment = async (text: string, files: File[]) => {
     if (text.trim()) {
-      await addComment.mutateAsync({ milestoneId: milestone.id, comment: text });
+      await addComment.mutateAsync({ projectId, milestoneId: milestone.id, comment: text });
     }
     for (const file of files) {
-      await addAttachment.mutateAsync({ milestoneId: milestone.id, file });
+      await addAttachment.mutateAsync({ projectId, milestoneId: milestone.id, file });
     }
   };
 

@@ -1,4 +1,5 @@
-// hooks/useProjects.ts
+// hooks/useProjects.ts - Updated with correct URL structure
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/clientApi';
 import { toast } from 'sonner';
@@ -245,14 +246,11 @@ export const useAddProjectMembers = () => {
   });
 };
 
-
-// hooks/useProjects.ts - Update the member mutations
-
 export const useUpdateProjectMemberRole = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ projectId, userId, role }: { projectId: number; userId: number; role: string }) =>
-      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members?userId=${userId}`, {
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members/${userId}`, {
         method: 'PATCH',
         body: { role },
       }),
@@ -270,7 +268,7 @@ export const useRemoveProjectMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ projectId, userId }: { projectId: number; userId: number }) =>
-      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members?userId=${userId}`, {
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members/${userId}`, {
         method: 'DELETE',
       }),
     onSuccess: (_, vars) => {
@@ -302,16 +300,28 @@ export const useCreateMilestone = () => {
   });
 };
 
+// ─── Milestone operations with projectId in URL ────────────────────────────
+
 export const useUpdateMilestoneStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ milestoneId, status, comment }: { milestoneId: number; status: string; comment?: string }) =>
-      apiRequest<{ ok: boolean }>(`/api/milestones/${milestoneId}/status`, {
+    mutationFn: ({ 
+      projectId, 
+      milestoneId, 
+      status, 
+      comment 
+    }: { 
+      projectId: number; 
+      milestoneId: number; 
+      status: string; 
+      comment?: string 
+    }) =>
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/milestones/${milestoneId}/status`, {
         method: 'PATCH',
         body: { status, comment },
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project'] });
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['project', vars.projectId] });
       toast.success('Milestone status updated!');
     },
     onError: (err) => toast.error('Failed to update milestone status', {
@@ -323,13 +333,21 @@ export const useUpdateMilestoneStatus = () => {
 export const useAddMilestoneComment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ milestoneId, comment }: { milestoneId: number; comment: string }) =>
-      apiRequest<{ id: number }>(`/api/milestones/${milestoneId}/comments`, {
+    mutationFn: ({ 
+      projectId, 
+      milestoneId, 
+      comment 
+    }: { 
+      projectId: number; 
+      milestoneId: number; 
+      comment: string 
+    }) =>
+      apiRequest<{ id: number }>(`/api/projects/${projectId}/milestones/${milestoneId}/comments`, {
         method: 'POST',
         body: { comment },
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project'] });
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['project', vars.projectId] });
       toast.success('Comment added!');
     },
     onError: (err) => toast.error('Failed to add comment', {
@@ -341,10 +359,18 @@ export const useAddMilestoneComment = () => {
 export const useAddMilestoneAttachment = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ milestoneId, file }: { milestoneId: number; file: File }) => {
+    mutationFn: ({ 
+      projectId, 
+      milestoneId, 
+      file 
+    }: { 
+      projectId: number; 
+      milestoneId: number; 
+      file: File 
+    }) => {
       const formData = new FormData();
       formData.append('file', file);
-      return fetch(`/api/milestones/${milestoneId}/attachments`, {
+      return fetch(`/api/projects/${projectId}/milestones/${milestoneId}/attachments`, {
         method: 'POST',
         body: formData,
       }).then(async (res) => {
@@ -353,8 +379,8 @@ export const useAddMilestoneAttachment = () => {
         return data;
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['project'] });
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['project', vars.projectId] });
       toast.success('File uploaded successfully!');
     },
     onError: (err) => toast.error('Failed to upload file', {
@@ -362,6 +388,8 @@ export const useAddMilestoneAttachment = () => {
     }),
   });
 };
+
+// ─── Project Discussion and Attachments ─────────────────────────────────────
 
 export const useAddProjectDiscussion = () => {
   const queryClient = useQueryClient();
@@ -410,7 +438,7 @@ export const useDeleteProjectAttachment = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ projectId, attachmentId }: { projectId: number; attachmentId: number }) =>
-      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/attachments?attachmentId=${attachmentId}`, {
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/attachments/${attachmentId}`, {
         method: 'DELETE',
       }),
     onSuccess: (_, vars) => {
