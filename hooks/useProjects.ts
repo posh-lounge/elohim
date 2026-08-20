@@ -245,11 +245,14 @@ export const useAddProjectMembers = () => {
   });
 };
 
+
+// hooks/useProjects.ts - Update the member mutations
+
 export const useUpdateProjectMemberRole = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ projectId, userId, role }: { projectId: number; userId: number; role: string }) =>
-      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members/${userId}`, {
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members?userId=${userId}`, {
         method: 'PATCH',
         body: { role },
       }),
@@ -267,7 +270,7 @@ export const useRemoveProjectMember = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ projectId, userId }: { projectId: number; userId: number }) =>
-      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members/${userId}`, {
+      apiRequest<{ ok: boolean }>(`/api/projects/${projectId}/members?userId=${userId}`, {
         method: 'DELETE',
       }),
     onSuccess: (_, vars) => {
