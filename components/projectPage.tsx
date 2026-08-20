@@ -1,4 +1,4 @@
-// app/dashboard/projects/page.tsx
+// app/projects/page.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -248,7 +248,7 @@ export default function ProjectsPage() {
             return (
               <Link
                 key={p.id}
-                href={`/dashboard/projects/${p.id}`}
+                href={`/projects/${p.id}`}
                 className="group bg-[#0d1120] rounded-2xl border border-[#1a2035] p-5 hover:border-indigo-500/60 transition flex flex-col gap-3"
               >
                 <div className="flex items-start justify-between gap-2">

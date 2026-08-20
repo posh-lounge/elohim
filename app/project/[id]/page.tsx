@@ -1,4 +1,4 @@
-// app/dashboard/projects/[id]/page.tsx
+// app/projects/[id]/page.tsx
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -991,7 +991,7 @@ export default function ProjectDetailPage() {
     <div className="min-h-screen bg-[#0a0e1a] p-4 sm:p-6 max-w-7xl mx-auto">
       {/* Back & Actions */}
       <div className="flex items-center justify-between mb-5">
-        <Link href="/dashboard/projects" className="inline-flex items-center gap-1.5 text-slate-500 hover:text-white text-sm transition">
+        <Link href="/projects" className="inline-flex items-center gap-1.5 text-slate-500 hover:text-white text-sm transition">
           <ArrowLeft size={14} /> All Projects
         </Link>
         <div className="flex items-center gap-2">
