@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Plus, Trash2 } from 'lucide-react';
+import { Play, Plus, Trash2, FileSpreadsheet } from 'lucide-react';
 import type { PayrollEntry } from '@/lib/types';
 import { PAYROLL_CATEGORY_LABEL } from '@/lib/types';
 import { useAllEmployeesForPicker } from '@/hooks/useEmployees';
@@ -9,6 +9,7 @@ import { usePayroll, useDeletePayrollEntry } from '@/hooks/usePayroll';
 import { RunPayrollModal } from './RunPayrollModal';
 import { AddPayrollEntryModal } from './AddPayrollEntryModal';
 import { PayrollSummary } from './PayrollSummary';
+import { exportPayrollToExcel } from '@/lib/payrollExcelExport';
 
 function currentPeriod() {
   const d = new Date();
@@ -100,6 +101,7 @@ export function Payroll() {
   const [period, setPeriod] = useState(currentPeriod());
   const [showRun, setShowRun] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const employeesQuery = useAllEmployeesForPicker();
   const payrollQuery = usePayroll({ period });
   const deleteEntry = useDeletePayrollEntry();
@@ -113,6 +115,15 @@ export function Payroll() {
 
   const activeEmployees = (employeesQuery.data ?? []).filter((e) => e.isActive);
 
+  async function handleExport() {
+    setIsExporting(true);
+    try {
+      await exportPayrollToExcel(entries, period);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
@@ -121,6 +132,10 @@ export function Payroll() {
           className="bg-surface-alt border border-border rounded-lg px-3 py-1.5 text-[12.5px]"
         />
         <div className="flex gap-2">
+          <button
+            onClick={handleExport} disabled={entries.length === 0 || isExporting}
+            className="flex items-center gap-1.5 bg-surface-alt border border-border text-muted rounded-lg px-3 py-1.5 text-xs disabled:opacity-40"
+          ><FileSpreadsheet size={13} /> {isExporting ? 'Exporting…' : 'Export to Excel'}</button>
           <button
             onClick={() => setShowAdd(true)} disabled={activeEmployees.length === 0}
             className="flex items-center gap-1.5 bg-surface-alt border border-border text-muted rounded-lg px-3 py-1.5 text-xs disabled:opacity-40"
