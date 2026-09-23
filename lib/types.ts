@@ -121,6 +121,8 @@ export interface LeaveRequest {
 
 export type EmploymentType = 'permanent' | 'contractor';
 
+// ─── Employee ───────────────────────────────────────────────────────────────
+
 export interface Employee {
   id: number;
   name: string;
@@ -135,8 +137,89 @@ export interface Employee {
   createdAt: string;
   roleKey: RoleKey | null;
   hasSystemAccess: boolean;
-  baseSalary?: number;        // new
+  baseSalary?: number;
+
+  // ── Personal information ──────────────────────────────────────────────────
+  dateOfBirth: string | null;              // ISO date (YYYY-MM-DD)
+  nationalId: string | null;
+  address: string | null;
+
+  // ── Emergency contact ─────────────────────────────────────────────────────
+  emergencyContactName: string | null;
+  emergencyContactPhone: string | null;
+  emergencyContactRelationship: string | null;
+
+  // ── Bank & tax ────────────────────────────────────────────────────────────
+  bankAccount: string | null;
+  bankName: string | null;
+  tinNumber: string | null;
+  socialSecurityNumber: string | null;
+
+  // ── Media ─────────────────────────────────────────────────────────────────
+  profilePhotoPath: string | null;         // relative path under /uploads
 }
+
+/** Fields a PATCH /employees/{id} call may update. */
+export interface EmployeeProfileUpdate {
+  // Core fields already supported by useUpdateEmployee
+  employmentType?: EmploymentType;
+  isActive?: boolean;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  position?: string;
+  department?: string;
+  baseSalary?: number;
+
+  // New profile fields
+  dateOfBirth?: string;
+  nationalId?: string;
+  address?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  bankAccount?: string;
+  bankName?: string;
+  tinNumber?: string;
+  socialSecurityNumber?: string;
+}
+
+// ─── Employee documents ─────────────────────────────────────────────────────
+
+export type EmployeeDocumentType =
+  | 'national_id'
+  | 'contract'
+  | 'certificate'
+  | 'diploma'
+  | 'cv'
+  | 'recommendation'
+  | 'medical'
+  | 'other';
+
+export interface EmployeeDocument {
+  id: number;
+  documentType: EmployeeDocumentType;
+  fileName: string;
+  filePath: string;          // relative path under /uploads
+  fileSize: number;          // bytes
+  fileType: string | null;   // MIME type
+  description: string | null;
+  uploadedByName: string;
+  createdAt: string;
+}
+
+export const EMPLOYEE_DOCUMENT_TYPE_LABEL: Record<EmployeeDocumentType, string> = {
+  national_id: 'National ID',
+  contract: 'Employment Contract',
+  certificate: 'Certificate',
+  diploma: 'Diploma',
+  cv: 'CV / Resume',
+  recommendation: 'Recommendation Letter',
+  medical: 'Medical Certificate',
+  other: 'Other',
+};
+
+// ─── Payroll ────────────────────────────────────────────────────────────────
 
 export type PayrollCategory =
   | 'base_salary' | 'bonus' | 'loan' | 'advance'
@@ -177,6 +260,8 @@ export const AUTO_CALCULATED_CATEGORIES: PayrollCategory[] = [
 ];
 export const MANUAL_PAYROLL_CATEGORIES: PayrollCategory[] = ['bonus', 'loan', 'advance', 'other'];
 
+// ─── Activity ───────────────────────────────────────────────────────────────
+
 export interface ActivityEntry {
   id: number;
   action: string;
@@ -186,6 +271,8 @@ export interface ActivityEntry {
   createdAt: string;
   actor: { name: string; role: { key: RoleKey; label: string } } | null;
 }
+
+// ─── Task scoping ───────────────────────────────────────────────────────────
 
 export type TaskScope = 'my' | 'team' | 'all';
 

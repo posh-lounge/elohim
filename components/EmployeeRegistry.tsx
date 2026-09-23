@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Wifi, WifiOff, Loader2, ListChecks, ChevronDown } from 'lucide-react';
+import { UserPlus, Wifi, WifiOff, Loader2, ListChecks, ChevronDown, UserCircle, ImageOff } from 'lucide-react';
 import type { Employee } from '@/lib/types';
 import { useEmployees, useUpdateEmployee } from '@/hooks/useEmployees';
 import { AddEmployeeModal } from './AddEmployeeModal';
 import { EmployeeResponsibilitiesModal } from './EmployeeResponsibilitiesModal';
 import { SalaryEditor } from './SalaryEditor';
+import { EmployeeProfileModal } from './EmployeeProfileModal';
 
 function fmtRWF(n: number) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' RWF';
@@ -17,10 +18,46 @@ function fmtDate(iso: string | null) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/** Small circular avatar for the roster table. Falls back to initials when
+ *  the employee has no profile photo on file. */
+function RosterAvatar({ employee, size = 28 }: { employee: Employee; size?: number }) {
+  const initials = employee.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
+  if (employee.profilePhotoPath) {
+    return (
+      <img
+        src={`/${employee.profilePhotoPath}`}
+        alt={employee.name}
+        className="rounded-full object-cover border border-border flex-shrink-0"
+        style={{ width: size, height: size }}
+        onError={(ev) => {
+          // Broken image → hide it so the initials fallback can show through
+          (ev.currentTarget as HTMLImageElement).style.display = 'none';
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="rounded-full bg-gold-soft flex items-center justify-center text-primary font-semibold flex-shrink-0 border border-border"
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}
+    >
+      {initials || <ImageOff size={Math.round(size * 0.5)} />}
+    </div>
+  );
+}
+
 export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
   const employeesQuery = useEmployees();
   const updateEmployee = useUpdateEmployee();
   const [showAdd, setShowAdd] = useState(false);
+  const [profileTarget, setProfileTarget] = useState<Employee | null>(null);
   const [respTarget, setRespTarget] = useState<Employee | null>(null);
   const [salaryTarget, setSalaryTarget] = useState<Employee | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -67,7 +104,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="bg-surface-alt text-left text-faint font-mono text-[10.5px] uppercase tracking-wide">
-                <th className="px-4 py-2.5 font-semibold">Name</th>
+                <th className="px-4 py-2.5 font-semibold">Employee</th>
                 <th className="px-4 py-2.5 font-semibold">Position</th>
                 <th className="px-4 py-2.5 font-semibold">Department</th>
                 <th className="px-4 py-2.5 font-semibold">Type</th>
@@ -82,7 +119,16 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                 const isBusy = busyId === e.id;
                 return (
                   <tr key={e.id} className={`border-t border-border-soft ${!e.isActive ? 'opacity-50' : ''}`}>
-                    <td className="px-4 py-2.5 font-semibold">{e.name}</td>
+                    <td className="px-4 py-2.5">
+                      <button
+                        onClick={() => setProfileTarget(e)}
+                        className="flex items-center gap-2.5 text-left group"
+                        title="View profile"
+                      >
+                        <RosterAvatar employee={e} size={30} />
+                        <span className="font-semibold group-hover:text-gold transition">{e.name}</span>
+                      </button>
+                    </td>
                     <td className="px-4 py-2.5 text-muted">{e.position}</td>
                     <td className="px-4 py-2.5 text-muted">{e.department}</td>
                     <td className="px-4 py-2.5">
@@ -107,6 +153,10 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                     <td className="px-4 py-2.5 text-faint">{fmtDate(e.hireDate)}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex justify-end gap-1.5">
+                        <button
+                          onClick={() => setProfileTarget(e)} title="View profile"
+                          className="w-7 h-7 flex items-center justify-center rounded-md border border-border bg-surface-alt text-muted hover:text-gold hover:border-gold transition"
+                        ><UserCircle size={13} /></button>
                         <button
                           onClick={() => setRespTarget(e)} title="Responsibilities"
                           className="w-7 h-7 flex items-center justify-center rounded-md border border-border bg-surface-alt text-muted"
@@ -141,6 +191,13 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
       {showAdd && <AddEmployeeModal onClose={() => setShowAdd(false)} />}
       {respTarget && <EmployeeResponsibilitiesModal employee={respTarget} onClose={() => setRespTarget(null)} />}
       {salaryTarget && <SalaryEditor employee={salaryTarget} onClose={() => setSalaryTarget(null)} />}
+      {profileTarget && (
+        <EmployeeProfileModal
+          employee={profileTarget}
+          canManage={canManage}
+          onClose={() => setProfileTarget(null)}
+        />
+      )}
     </div>
   );
 }
