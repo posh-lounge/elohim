@@ -9,6 +9,7 @@ export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
   logistics_coordinator: Truck,
   personal_assistant: ClipboardList,
   accountant: Calculator,
+  interpretation_translation: ChefHat,
 };
 
 // Tailwind class fragments (text/border/bg) keyed by the department accent
@@ -23,7 +24,9 @@ export const ROLE_ACCENT: Record<RoleKey, { text: string; border: string; bg: st
   logistics_coordinator:    { text: 'text-logistics',   border: 'border-logistics',   bg: 'bg-logistics',   softBg: 'bg-logistics-soft' },
   personal_assistant:       { text: 'text-office',      border: 'border-office',      bg: 'bg-office',      softBg: 'bg-office-soft' },
   accountant:               { text: 'text-accountant',  border: 'border-accountant',  bg: 'bg-accountant',  softBg: 'bg-accountant-soft' },
+  interpretation_translation: { text: 'text-translation', border: 'border-translation', bg: 'bg-translation', softBg: 'bg-translation-soft' },
 };
+
 
 export const PRIORITY_ACCENT: Record<'low' | 'medium' | 'high', string> = {
   high: 'text-danger border-danger',

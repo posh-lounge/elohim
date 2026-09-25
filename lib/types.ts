@@ -5,7 +5,8 @@ export type RoleKey =
   | 'apartment_manager'
   | 'logistics_coordinator'
   | 'personal_assistant'
-  | 'accountant';
+  | 'accountant'
+  | 'interpretation_translation';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type Priority = 'low' | 'medium' | 'high';
@@ -283,13 +284,14 @@ export type TaskScope = 'my' | 'team' | 'all';
 // manager who wants work done outside their own direct reports routes
 // it through the person who actually manages that role.
 export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
-  owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager'],
-  ops_manager: [ 'personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager'],
+  owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
+  ops_manager: [ 'personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
   bar_manager: [],
   apartment_manager: [],
   logistics_coordinator: [],
   personal_assistant: [],
   accountant: [],
+  interpretation_translation: [],
 };
 
 // Mirrors backend/handlers/tasks_handler.php's HIDDEN_FROM_OPS_MANAGER — the
