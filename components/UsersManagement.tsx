@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, KeyRound, Power, Loader2, ChevronDown } from 'lucide-react';
+import { UserPlus, KeyRound, Power, Loader2, ChevronDown, UserX, Users } from 'lucide-react';
 import type { ManagedUser, Role, RoleKey } from '@/lib/types';
 import { useUsers, useUpdateUser } from '@/hooks/useUsers';
 import { ROLE_ACCENT } from '@/lib/roleDisplay';
@@ -12,15 +12,22 @@ function fmtDate(iso: string) {
   return new Date(iso.replace(' ', 'T')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+type View = 'active' | 'inactive';
+
 export function UsersManagement({ roles }: { roles: Role[] }) {
   const usersQuery = useUsers();
   const updateUser = useUpdateUser();
   const [showAdd, setShowAdd] = useState(false);
   const [resetTarget, setResetTarget] = useState<ManagedUser | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [view, setView] = useState<View>('active');
 
-  const users = usersQuery.data?.pages.flatMap((p) => p.users) ?? [];
+  const allUsers = usersQuery.data?.pages.flatMap((p) => p.users) ?? [];
   const total = usersQuery.data?.pages[0]?.total ?? 0;
+
+  const activeUsers = allUsers.filter((u) => u.isActive);
+  const inactiveUsers = allUsers.filter((u) => !u.isActive);
+  const users = view === 'active' ? activeUsers : inactiveUsers;
 
   const toggleActive = (u: ManagedUser) => {
     setBusyId(u.id);
@@ -37,12 +44,27 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <div className="text-[13px] text-muted">
-          {usersQuery.data ? `${users.length} of ${total} accounts` : 'Loading…'}
+          {usersQuery.data
+            ? `${users.length} ${view} · ${allUsers.length} of ${total} loaded`
+            : 'Loading…'}
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 bg-gold text-[#1A1408] font-bold rounded-lg px-3 py-1.5 text-xs"
-        ><UserPlus size={14} /> Add user</button>
+        <div className="flex items-center gap-2">
+          {view === 'active' ? (
+            <button
+              onClick={() => setView('inactive')}
+              className="flex items-center gap-1.5 border border-border bg-surface-alt text-muted rounded-lg px-3 py-1.5 text-xs font-semibold"
+            ><UserX size={14} /> Inactive ({inactiveUsers.length})</button>
+          ) : (
+            <button
+              onClick={() => setView('active')}
+              className="flex items-center gap-1.5 border border-border bg-surface-alt text-muted rounded-lg px-3 py-1.5 text-xs font-semibold"
+            ><Users size={14} /> Back to active ({activeUsers.length})</button>
+          )}
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 bg-gold text-[#1A1408] font-bold rounded-lg px-3 py-1.5 text-xs"
+          ><UserPlus size={14} /> Add user</button>
+        </div>
       </div>
 
       {usersQuery.isLoading && <div className="text-sm text-faint py-8">Loading accounts…</div>}
@@ -61,6 +83,13 @@ export function UsersManagement({ roles }: { roles: Role[] }) {
               </tr>
             </thead>
             <tbody>
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-faint">
+                    {view === 'active' ? 'No active users.' : 'No inactive users.'}
+                  </td>
+                </tr>
+              )}
               {users.map((u) => {
                 const accent = ROLE_ACCENT[u.role.key];
                 const isBusy = busyId === u.id;
