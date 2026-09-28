@@ -36,7 +36,6 @@ function RosterAvatar({ employee, size = 28 }: { employee: Employee; size?: numb
         className="rounded-full object-cover border border-border flex-shrink-0"
         style={{ width: size, height: size }}
         onError={(ev) => {
-          // Broken image → hide it so the initials fallback can show through
           (ev.currentTarget as HTMLImageElement).style.display = 'none';
         }}
       />
@@ -62,6 +61,8 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
   const [salaryTarget, setSalaryTarget] = useState<Employee | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'permanent' | 'contractor'>('all');
+  // Active employees by default; flip to see deactivated ones
+  const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
   const allEmployees = employeesQuery.data?.pages.flatMap((p) => p.employees) ?? [];
   const total = employeesQuery.data?.pages[0]?.total ?? 0;
@@ -71,14 +72,35 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
     updateEmployee.mutate({ id: e.id, isActive: !e.isActive }, { onSettled: () => setBusyId(null) });
   };
 
-  const filtered = allEmployees.filter((e) => filter === 'all' || e.employmentType === filter);
-  const permCount = allEmployees.filter((e) => e.employmentType === 'permanent').length;
-  const contractorCount = allEmployees.filter((e) => e.employmentType === 'contractor').length;
+  const activeCount = allEmployees.filter((e) => e.isActive).length;
+  const inactiveCount = allEmployees.length - activeCount;
+
+  // Everything below (type filter + counts) only looks at the current status view
+  const inStatus = allEmployees.filter((e) => (status === 'active' ? e.isActive : !e.isActive));
+  const filtered = inStatus.filter((e) => filter === 'all' || e.employmentType === filter);
+  const permCount = inStatus.filter((e) => e.employmentType === 'permanent').length;
+  const contractorCount = inStatus.filter((e) => e.employmentType === 'contractor').length;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Active / Inactive switch */}
+          <div className="flex gap-1 p-1 rounded-lg border border-border bg-surface-alt">
+            {(['active', 'inactive'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => { setStatus(s); setFilter('all'); }}
+                className={`text-xs px-3 py-1.5 rounded-md capitalize font-semibold transition ${
+                  status === s ? 'bg-gold text-[#1A1408]' : 'text-muted hover:text-primary'
+                }`}
+              >
+                {s} ({s === 'active' ? activeCount : inactiveCount})
+              </button>
+            ))}
+          </div>
+
+          {/* Type filter */}
           <div className="flex gap-1.5">
             {(['all', 'permanent', 'contractor'] as const).map((f) => (
               <button
@@ -89,7 +111,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
           </div>
           <span className="text-[11px] text-faint">{allEmployees.length} of {total} loaded</span>
         </div>
-        {canManage && (
+        {canManage && status === 'active' && (
           <button
             onClick={() => setShowAdd(true)}
             className="flex items-center gap-1.5 bg-gold text-[#1A1408] font-bold rounded-lg px-3 py-1.5 text-xs"
@@ -115,10 +137,19 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
               </tr>
             </thead>
             <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-faint">
+                    {status === 'active'
+                      ? 'No active employees to show.'
+                      : 'No inactive employees — everyone on the roster is active.'}
+                  </td>
+                </tr>
+              )}
               {filtered.map((e) => {
                 const isBusy = busyId === e.id;
                 return (
-                  <tr key={e.id} className={`border-t border-border-soft ${!e.isActive ? 'opacity-50' : ''}`}>
+                  <tr key={e.id} className={`border-t border-border-soft ${!e.isActive ? 'opacity-60' : ''}`}>
                     <td className="px-4 py-2.5">
                       <button
                         onClick={() => setProfileTarget(e)}
