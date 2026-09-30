@@ -65,8 +65,8 @@ export function Dashboard() {
   const currentRole = roles.find((r) => r.key === user.role.key);
   const assignable = ASSIGNABLE_ROLES[user.role.key] ?? [];
   const canAssign = 1 + assignable.length > 1;
-  const isTopLevel = user.role.key === 'owner' || user.role.key === 'ops_manager';
-  const isOwner = user.role.key === 'owner';
+  const isTopLevel = user.role.key === 'owner' || user.role.key === 'ops_manager' || user.role.key === 'it_manager';
+  const isOwner = user.role.key === 'owner' || user.role.key === 'it_manager';
   const isAccountant = user.role.key === 'accountant';
   const canSeeEmployees = isOwner || user.role.key === 'ops_manager' || isAccountant;
   const canSeePayroll = isOwner || isAccountant;

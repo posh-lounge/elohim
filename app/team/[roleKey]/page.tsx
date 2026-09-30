@@ -44,7 +44,7 @@ export default function TeamMemberPage() {
   const roleLabelByKey = Object.fromEntries(roles.map((r) => [r.key, r.label]));
   const targetRole = roles.find((r) => r.key === targetRoleKey);
 
-  const isOwner = user.role.key === 'owner';
+  const isOwner = user.role.key === 'owner' ||  user.role.key === 'it_manager';
   const isOpsManager = user.role.key === 'ops_manager';
   const isTopLevel = isOwner || isOpsManager;
   const isSelf = user.role.key === targetRoleKey;

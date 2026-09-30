@@ -1,8 +1,9 @@
-import { Crown, Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, Calculator, type LucideIcon } from 'lucide-react';
+import { Crown, , Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, Calculator, type LucideIcon } from 'lucide-react';
 import type { RoleKey } from './types';
 
 export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
   owner: Crown,
+  it_manager: Crown,
   ops_manager: Briefcase,
   bar_manager: Beer,
   apartment_manager: Building2,
@@ -17,6 +18,7 @@ export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
 // concatenation) so Tailwind's compiler can see and generate them.
 export const ROLE_ACCENT: Record<RoleKey, { text: string; border: string; bg: string; softBg: string }> = {
   owner:                   { text: 'text-gold',        border: 'border-gold',        bg: 'bg-gold',        softBg: 'bg-gold-soft' },
+  it_manager:              { text: 'text-gold',        border: 'border-gold',        bg: 'bg-gold',        softBg: 'bg-gold-soft' },
   ops_manager:             { text: 'text-gold',        border: 'border-gold',        bg: 'bg-gold',        softBg: 'bg-gold-soft' },
 
   bar_manager:              { text: 'text-restaurant',  border: 'border-restaurant',  bg: 'bg-restaurant',  softBg: 'bg-restaurant-soft' },

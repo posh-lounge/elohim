@@ -1,5 +1,6 @@
 export type RoleKey =
   | 'owner'
+  | 'it_manager'
   | 'ops_manager'
   | 'bar_manager'
   | 'apartment_manager'
@@ -284,7 +285,8 @@ export type TaskScope = 'my' | 'team' | 'all';
 // manager who wants work done outside their own direct reports routes
 // it through the person who actually manages that role.
 export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
-  owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
+  owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation','it_manager'],
+  it_manager: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation','it_manager'],
   ops_manager: [ 'personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
   bar_manager: [],
   apartment_manager: [],
@@ -300,4 +302,4 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
 // (skip a doomed fetch, show the same clean "no visibility" message as any
 // other unauthorized case); the backend re-checks this on every request
 // regardless.
-export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner'];
+export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner','it_manager'];

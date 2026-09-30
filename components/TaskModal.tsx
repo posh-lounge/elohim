@@ -55,12 +55,13 @@ export function TaskModal({
     ? task.assignedToEmployee.id === currentEmployeeId
     : task.assignedToRole === currentRoleKey;
   const overdue = isOverdue(task.status, task.dueDate);
-  const canComment = currentRoleKey === 'ops_manager' || currentRoleKey === 'owner';
+  const canComment = currentRoleKey === 'ops_manager' || currentRoleKey === 'owner' || currentRoleKey === 'it_manager';
 
   const canEdit = task.status === 'todo' && (
     (task.assignedToEmployee && task.assignedToEmployee.id === currentEmployeeId) ||
     currentRoleKey === 'owner' ||
-    currentRoleKey === 'ops_manager'
+    currentRoleKey === 'ops_manager' ||
+    currentRoleKey === 'it_manager'
   );
 
   const submit = () => {
