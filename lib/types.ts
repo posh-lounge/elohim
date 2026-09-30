@@ -286,7 +286,7 @@ export type TaskScope = 'my' | 'team' | 'all';
 // it through the person who actually manages that role.
 export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
   owner: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation','it_manager'],
-  it_manager: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation','it_manager'],
+  it_manager: ['ops_manager','personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
   ops_manager: [ 'personal_assistant', 'accountant','apartment_manager',  'logistics_coordinator' ,'bar_manager','interpretation_translation'],
   bar_manager: [],
   apartment_manager: [],

@@ -1,4 +1,4 @@
-import { Crown, , Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, Calculator, type LucideIcon } from 'lucide-react';
+import { Crown,  Briefcase, ChefHat, Beer, Building2, Users, Truck, ClipboardList, Calculator, type LucideIcon } from 'lucide-react';
 import type { RoleKey } from './types';
 
 export const ROLE_ICON: Record<RoleKey, LucideIcon> = {
