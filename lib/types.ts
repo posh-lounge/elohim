@@ -303,3 +303,64 @@ export const ASSIGNABLE_ROLES: Record<RoleKey, RoleKey[]> = {
 // other unauthorized case); the backend re-checks this on every request
 // regardless.
 export const HIDDEN_FROM_OPS_MANAGER: RoleKey[] = ['owner','it_manager'];
+
+
+// ─── Invoices ───────────────────────────────────────────────────────────────
+
+export type InvoiceStatus = 'Draft' | 'Unpaid' | 'Paid' | 'Cancelled';
+
+export interface Invoice {
+  invNo: number;
+  invId: string;
+  clientName: string;
+  clientDetails: string;
+  currency: string;
+  duedate: string;
+  created_date: string;
+  createdby: number;
+  status: InvoiceStatus;
+  approvedby: number | null;
+  subTotal: number;
+  vat: number;
+  grandTotal: number;
+  paidAmount: number;
+  balanceAmount: number;
+  // Joined fields (returned by detail endpoint)
+  createdByName?: string;
+  approvedByName?: string | null;
+}
+
+export interface InvoiceProduct {
+  id: number;
+  invId: string;
+  product_name: string;
+  price: number;
+  quantity: number;
+  total: number;
+  created_date: string;
+  createdBy: number;
+}
+
+export interface InvoicePayment {
+  id: number;
+  invId: string;
+  payment_amount: number;
+  payment_mode: string;
+  payment_status: string;
+  payment_date: string;
+  createdBy: number;
+  createdByName?: string;
+}
+
+export interface InvoiceDetail {
+  invoice: Invoice;
+  products: InvoiceProduct[];
+  payments: InvoicePayment[];
+}
+
+export type PaymentMode =
+  | 'Cash'
+  | 'Bank Transfer'
+  | 'Mobile Money'
+  | 'Cheque'
+  | 'Credit Card';

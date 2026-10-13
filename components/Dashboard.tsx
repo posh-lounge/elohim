@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Plus, Loader2, UserCog, Link2 , FileArchive } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCog, Link2 , FileArchive, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { RoleKey, TaskScope, TaskStatus } from '@/lib/types';
@@ -102,6 +102,10 @@ export function Dashboard() {
                 onClick={() => setShowLinks(true)}
                 className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs"
               ><Link2 size={13} /> Links</button>
+              <Link href="/invoices" className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs">
+  <FileText size={15} />
+  Invoices
+</Link>
             </div>
             <div className="flex items-center gap-2.5">
               <NotificationBell />
