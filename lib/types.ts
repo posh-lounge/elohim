@@ -364,3 +364,48 @@ export type PaymentMode =
   | 'Mobile Money'
   | 'Cheque'
   | 'Credit Card';
+
+
+  // ─── Letters ────────────────────────────────────────────────────────────────
+
+export type LetterStatus = 'Draft' | 'Final' | 'Sent' | 'Archived';
+
+export interface Letter {
+  id: number;
+  ref_no: string;
+  title: string;
+  to_name: string;
+  to_title: string | null;
+  to_address: string | null;
+  reason: string;
+  body_html: string;
+  conclusion: string | null;
+  status: LetterStatus;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+  finalized_by: number | null;
+  finalized_at: string | null;
+  // Joined
+  created_by_name?: string;
+  finalized_by_name?: string | null;
+}
+
+export interface LetterDetail {
+  letter: Letter;
+  signature: {
+    signature: string;
+    signed_by_name: string;
+    signed_at: string;
+  } | null;
+}
+
+export interface NewLetterInput {
+  title: string;
+  to_name: string;
+  to_title?: string;
+  to_address?: string;
+  reason: string;
+  body_html: string;
+  conclusion?: string;
+}

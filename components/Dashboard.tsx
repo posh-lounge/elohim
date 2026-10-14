@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LogOut, Plus, Loader2, UserCog, Link2 , FileArchive, FileText } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCog, Link2 , FileArchive, FileText, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { RoleKey, TaskScope, TaskStatus } from '@/lib/types';
@@ -102,10 +102,7 @@ export function Dashboard() {
                 onClick={() => setShowLinks(true)}
                 className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs"
               ><Link2 size={13} /> Links</button>
-              <Link href="/invoices" className="flex items-center gap-1.5 bg-surface border border-border text-muted rounded-lg px-2.5 py-1.5 text-xs">
-  <FileText size={15} />
-  Invoices
-</Link>
+             
             </div>
             <div className="flex items-center gap-2.5">
               <NotificationBell />
@@ -124,6 +121,20 @@ export function Dashboard() {
                
                   className="flex items-center gap-1.5 bg-green-600 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
                 ><FileArchive size={14} /> Projects</Link>
+
+                  <Link href="/invoices"
+               
+                  className="flex items-center gap-1.5 bg-pink-600 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
+                ><FileText size={14} /> Invoices</Link>
+
+
+
+<Link href="/letters"
+               
+                  className="flex items-center gap-1.5 bg-purple-600 border-none text-white rounded-lg px-3 py-1.5 text-xs font-bold"
+                ><Mail size={14} /> Letters</Link>
+
+                
               {isTaskTab && (
                 <button
                   onClick={() => setShowNewTask(true)}
