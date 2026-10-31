@@ -105,7 +105,7 @@ export function Dashboard() {
              
             </div>
             <div className="flex items-center gap-2.5">
-              <NotificationBell />
+             <NotificationBell onOpenTask={(task) => setSelectedTaskId(task.id)} />
               <button
                 onClick={() => setShowAccount(true)}
                 className="flex items-center gap-2 text-right mr-1 hover:opacity-80"

@@ -409,3 +409,17 @@ export interface NewLetterInput {
   body_html: string;
   conclusion?: string;
 }
+
+export interface NotificationCommentPreview {
+  id: number;
+  comment: string;
+  createdAt: string;
+  authorName: string;
+  authorRole: string;
+}
+
+export interface TaskNotification {
+  task: Task;
+  unreadCount: number;
+  latestComment: NotificationCommentPreview;
+}

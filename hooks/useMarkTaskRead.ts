@@ -11,6 +11,7 @@ export function useMarkTaskRead() {
       apiRequest<{ ok: boolean }>(`/api/tasks/${taskId}/read`, { method: 'POST' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });   // ← new
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
     onError: (err) => {
