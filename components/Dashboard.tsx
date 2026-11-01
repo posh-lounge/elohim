@@ -26,6 +26,7 @@ import { Payroll } from './Payroll';
 import { SystemLinksModal } from './SystemLinksModal';
 import { NotificationBell } from './NotificationBell';
 import { AbuseReports } from './AbuseReports';
+import { UnreadCommentsBanner } from './UnreadCommentsBanner';
 
 type DashboardTab = TaskScope | 'users' | 'directory' | 'kpis' | 'leave' | 'activity' | 'employees' | 'payroll' | 'abuse';
 
@@ -219,6 +220,10 @@ export function Dashboard() {
           onClose={() => setShowAccount(false)}
         />
       )}
+
+      <UnreadCommentsBanner onOpenTask={(t) => setSelectedTaskId(t.id)} />
     </div>
+
+    
   );
 }
