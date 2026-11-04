@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Check, Calendar, AlertTriangle, Pencil, Flag } from 'lucide-react';
+import { X, Check, Calendar, AlertTriangle, Pencil, Flag, Clock } from 'lucide-react';
 import type { RoleKey, Task, TaskStatus } from '@/lib/types';
-import { PriorityStamp, ProgressBar, fmtDate, isOverdue, timeAgo } from './primitives';
+import { PriorityStamp, ProgressBar, fmtDate, fmtDuration, isOverdue, timeAgo } from './primitives';
 import { useUpdateTaskStatus } from '@/hooks/useUpdateTaskStatus';
 import { useAddTaskUpdate } from '@/hooks/useAddTaskUpdate';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -162,6 +162,16 @@ export function TaskModal({
                   {overdue && ' · overdue'}
                 </div>
               </div>
+              {task.estimatedMinutes && (
+  <div>
+    <div className="font-mono text-[10px] uppercase tracking-wide text-faint">
+      Estimated time
+    </div>
+    <div className="mt-1 flex items-center gap-1">
+      <Clock size={12} /> {fmtDuration(task.estimatedMinutes)}
+    </div>
+  </div>
+)}
             </div>
 
             <div className="flex gap-1.5 flex-wrap mb-5">

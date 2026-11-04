@@ -9,6 +9,7 @@ const COMMON_LINK_TEMPLATES: { id: string; name: string; url: string }[] = [
   { id: 'Elohim Website', name: 'Elohim Website', url: 'https://www.elohimgroupltd.com' },
   { id: 'Elohim System', name: 'Elohim System', url: 'https://admin.elohimgroupltd.com' },
   { id: 'P conn system', name: 'P Conn System', url: 'https://drjohn.bconn.app' },
+  { id: 'Meeting Link', name: 'Meeting Link', url: 'https://meet.google.com/nrf-pqpz-ere' },
   // add more shared systems here
 ];
 

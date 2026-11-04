@@ -7,7 +7,7 @@ import type { Priority, RoleKey } from '@/lib/types';
 import { useCreateTask } from '@/hooks/useCreateTask';
 import { useEmployeesByRole } from '@/hooks/useEmployees';
 import { useEmployeeResponsibilities } from '@/hooks/useEmployeeResponsibilities';
-
+import { DurationPicker } from './DurationPicker';
 export function NewTaskModal({
   options,
   roleLabelByKey,
@@ -24,6 +24,7 @@ export function NewTaskModal({
   const [responsibilityId, setResponsibilityId] = useState<number | null>(null);
   const [priority, setPriority] = useState<Priority>('medium');
   const [dueDate, setDueDate] = useState('');
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(null);
 
   const createTask = useCreateTask();
   const employeesQuery = useEmployeesByRole(assignedToRole);
@@ -58,6 +59,7 @@ export function NewTaskModal({
         responsibilityId,
         priority,
         dueDate: dueDate || null,
+        estimatedMinutes,
       },
       { onSuccess: onClose }
     );
@@ -218,7 +220,7 @@ export function NewTaskModal({
               />
             </div>
           </div>
-
+<DurationPicker value={estimatedMinutes} onChange={setEstimatedMinutes} />
           {createTask.isError && (
             <div className="text-[11px] text-danger">
               {(createTask.error as Error).message}

@@ -13,6 +13,7 @@ export interface NewTaskInput {
   responsibilityId: number;
   priority: Priority;
   dueDate?: string | null;
+   estimatedMinutes?: number | null;
 }
 
 export function useCreateTask() {

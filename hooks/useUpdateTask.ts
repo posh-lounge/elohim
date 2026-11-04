@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 export function useUpdateTask() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ taskId, ...data }: { taskId: number; title?: string; description?: string; dueDate?: string; priority?: string; assignedToEmployeeId?: number; responsibilityId?: number }) =>
+    mutationFn: ({ taskId, ...data }: { taskId: number; title?: string; description?: string; dueDate?: string; priority?: string; assignedToEmployeeId?: number; responsibilityId?: number; estimatedMinutes?: number | null; }) =>
       apiRequest<{ ok: boolean }>(`/api/tasks/${taskId}`, { method: 'PATCH', body: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });

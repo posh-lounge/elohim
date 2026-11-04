@@ -50,6 +50,7 @@ export interface Task {
   updates: TaskUpdate[];
   commentCount: number;
   unreadCommentCount?: number;  // new
+  estimatedMinutes: number | null;
 }
 
 export interface PaginatedEnvelope {

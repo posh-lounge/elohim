@@ -1,9 +1,9 @@
 'use client';
 
-import { AlertTriangle, BellElectric, Calendar, MessageSquare, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { AlertTriangle, BellElectric, Calendar, MessageSquare, ChevronLeft, ChevronRight, Loader2, Clock } from 'lucide-react';
 import type { Task, TaskStatus } from '@/lib/types';
 import { ROLE_ACCENT } from '@/lib/roleDisplay';
-import { PriorityStamp, ProgressBar, fmtDate, isOverdue } from './primitives';
+import { PriorityStamp, ProgressBar, fmtDate, fmtDuration, isOverdue } from './primitives';
 
 const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
 
@@ -46,8 +46,13 @@ export function TaskCard({
           <span className="truncate">{task.assignedToEmployee?.name ?? 'Unassigned'}</span>
         </span>
         <span className={`flex items-center gap-1 text-[11px] font-mono shrink-0 ${overdue ? 'text-danger' : 'text-faint'}`}>
-          {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />} {fmtDate(task.dueDate)}
-        </span>
+  {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />} {fmtDate(task.dueDate)}
+</span>
+{task.estimatedMinutes && (
+  <span className="flex items-center gap-1 text-[11px] font-mono text-faint">
+    <Clock size={11} /> {fmtDuration(task.estimatedMinutes)}
+  </span>
+)}
       </div>
 
       {lastUpdate && <ProgressBar value={lastUpdate.progress} />}

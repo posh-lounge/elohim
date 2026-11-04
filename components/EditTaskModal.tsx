@@ -4,13 +4,14 @@ import { useState } from 'react';
 import { X, Check } from 'lucide-react';
 import type { Task } from '@/lib/types';
 import { useUpdateTask } from '@/hooks/useUpdateTask';
-
+import { DurationPicker } from './DurationPicker';
 export function EditTaskModal({ task, onClose }: { task: Task; onClose: () => void }) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || '');
   const [dueDate, setDueDate] = useState(task.dueDate || '');
   const [priority, setPriority] = useState(task.priority);
   const updateTask = useUpdateTask();
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number | null>(task.estimatedMinutes ?? null);
 
   const submit = () => {
     if (!title.trim()) return;
@@ -21,6 +22,7 @@ export function EditTaskModal({ task, onClose }: { task: Task; onClose: () => vo
         description: description.trim() || undefined,
         dueDate: dueDate || undefined,
         priority,
+        estimatedMinutes,
       },
       { onSuccess: onClose }
     );
@@ -53,6 +55,7 @@ export function EditTaskModal({ task, onClose }: { task: Task; onClose: () => vo
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
+          <DurationPicker value={estimatedMinutes} onChange={setEstimatedMinutes} />
           {updateTask.isError && <div className="text-xs text-danger">{(updateTask.error as Error).message}</div>}
           <button
             onClick={submit} disabled={!title.trim() || updateTask.isPending}
