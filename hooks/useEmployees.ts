@@ -99,28 +99,62 @@ export interface UpdateEmployeeInput {
   dateOfBirth?: string;
   nationalId?: string;
   address?: string;
+  residenceLocation?: string;
+
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   emergencyContactRelationship?: string;
+
   bankName?: string;
   bankAccount?: string;
   tinNumber?: string;
   socialSecurityNumber?: string;
-}
 
+  // Family
+  fatherName?: string;
+  fatherOccupation?: string;
+  fatherPhone?: string;
+  motherName?: string;
+  motherOccupation?: string;
+  motherPhone?: string;
+  maritalStatus?: string;
+  numberOfChildren?: number;
+
+  // Work background
+  educationLevel?: string;
+  fieldOfStudy?: string;
+  previousEmployer?: string;
+  previousPosition?: string;
+  yearsOfExperience?: number;
+  skillsSummary?: string;
+}
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...patch }: UpdateEmployeeInput) =>
-      apiRequest<{ ok: boolean }>(`/api/employees/${id}`, { method: 'PATCH', body: patch }),
+    mutationFn: ({ id, ...patch }: UpdateEmployeeInput) => {
+      const cleaned: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(patch)) {
+        if (value === '' || value === undefined) continue;
+        cleaned[key] = value;
+      }
+      if (Object.keys(cleaned).length === 0) {
+        throw new Error('No changes to save');
+      }
+      return apiRequest<{ ok: boolean }>(`/api/employees/${id}`, {
+        method: 'PATCH',
+        body: cleaned,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EMPLOYEES_KEY });
       toast.success('Employee updated');
     },
-    onError: (err) => toast.error('Could not update employee', { description: (err as Error).message }),
+    onError: (err) =>
+      toast.error('Could not update employee', {
+        description: (err as Error).message,
+      }),
   });
 }
-
 // ─── Documents ──────────────────────────────────────────────────────────────
 
 export function useEmployeeDocuments(employeeId: number) {

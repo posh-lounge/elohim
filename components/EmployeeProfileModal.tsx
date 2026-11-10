@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from 'react';
 import {
   User, Phone, Mail, MapPin, Calendar, Briefcase, Building2,
   CreditCard, FileText, Upload, Trash2, Download, Camera,
-  Loader2, X, AlertCircle, Plus, ChevronDown, Edit2, Save
+  Loader2, X, AlertCircle, Save, Edit2, Users, GraduationCap,
+  Home,
 } from 'lucide-react';
-import { Modal } from '@/components/ui/modal';
 import { toast } from 'sonner';
 import type { Employee, EmployeeDocument } from '@/lib/types';
 import {
@@ -16,6 +16,8 @@ import {
   useUploadProfilePhoto,
   useUpdateEmployee,
 } from '@/hooks/useEmployees';
+
+// ─── Constants ──────────────────────────────────────────────────────────────
 
 const DOCUMENT_TYPES = [
   { value: 'national_id', label: 'National ID' },
@@ -28,6 +30,26 @@ const DOCUMENT_TYPES = [
   { value: 'other', label: 'Other' },
 ];
 
+const MARITAL_STATUSES = [
+  { value: 'single', label: 'Single' },
+  { value: 'married', label: 'Married' },
+  { value: 'divorced', label: 'Divorced' },
+  { value: 'widowed', label: 'Widowed' },
+];
+
+const EDUCATION_LEVELS = [
+  { value: 'primary', label: 'Primary' },
+  { value: 'secondary', label: 'Secondary' },
+  { value: 'tvet', label: 'TVET / Vocational' },
+  { value: 'diploma', label: 'Diploma' },
+  { value: 'bachelors', label: "Bachelor's" },
+  { value: 'masters', label: "Master's" },
+  { value: 'phd', label: 'PhD' },
+  { value: 'other', label: 'Other' },
+];
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
 function fmtSize(b: number) {
   if (b < 1024) return `${b}B`;
   if (b < 1048576) return `${(b / 1024).toFixed(1)}KB`;
@@ -37,13 +59,59 @@ function fmtSize(b: number) {
 function fmtDate(iso: string | null) {
   if (!iso) return '—';
   return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric'
+    month: 'short', day: 'numeric', year: 'numeric',
   });
 }
 
-function Avatar({ name, photoPath, size = 80 }: { name: string; photoPath: string | null; size?: number }) {
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  
+function buildFormState(employee: Employee) {
+  return {
+    dateOfBirth: employee.dateOfBirth ?? '',
+    nationalId: employee.nationalId ?? '',
+    address: employee.address ?? '',
+    residenceLocation: employee.residenceLocation ?? '',
+
+    emergencyContactName: employee.emergencyContactName ?? '',
+    emergencyContactPhone: employee.emergencyContactPhone ?? '',
+    emergencyContactRelationship: employee.emergencyContactRelationship ?? '',
+
+    bankAccount: employee.bankAccount ?? '',
+    bankName: employee.bankName ?? '',
+    tinNumber: employee.tinNumber ?? '',
+    socialSecurityNumber: employee.socialSecurityNumber ?? '',
+
+    // Family
+    fatherName: employee.fatherName ?? '',
+    fatherOccupation: employee.fatherOccupation ?? '',
+    fatherPhone: employee.fatherPhone ?? '',
+    motherName: employee.motherName ?? '',
+    motherOccupation: employee.motherOccupation ?? '',
+    motherPhone: employee.motherPhone ?? '',
+    maritalStatus: employee.maritalStatus ?? '',
+    numberOfChildren:
+      employee.numberOfChildren === null || employee.numberOfChildren === undefined
+        ? ''
+        : String(employee.numberOfChildren),
+
+    // Work background
+    educationLevel: employee.educationLevel ?? '',
+    fieldOfStudy: employee.fieldOfStudy ?? '',
+    previousEmployer: employee.previousEmployer ?? '',
+    previousPosition: employee.previousPosition ?? '',
+    yearsOfExperience:
+      employee.yearsOfExperience === null || employee.yearsOfExperience === undefined
+        ? ''
+        : String(employee.yearsOfExperience),
+    skillsSummary: employee.skillsSummary ?? '',
+  };
+}
+
+// ─── Avatar ─────────────────────────────────────────────────────────────────
+
+function Avatar({
+  name, photoPath, size = 80,
+}: { name: string; photoPath: string | null; size?: number }) {
+  const initials = name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+
   if (photoPath) {
     return (
       <img
@@ -54,7 +122,7 @@ function Avatar({ name, photoPath, size = 80 }: { name: string; photoPath: strin
       />
     );
   }
-  
+
   return (
     <div
       className="rounded-full bg-gold/20 flex items-center justify-center text-gold font-bold border-2 border-gold/30"
@@ -65,19 +133,20 @@ function Avatar({ name, photoPath, size = 80 }: { name: string; photoPath: strin
   );
 }
 
-interface TabProps {
-  id: string;
+// ─── Tab button ─────────────────────────────────────────────────────────────
+
+function Tab({
+  label, icon, active, onClick,
+}: {
   label: string;
   icon: React.ReactNode;
   active: boolean;
   onClick: () => void;
-}
-
-function Tab({ label, icon, active, onClick }: TabProps) {
+}) {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${
+      className={`flex items-center gap-2 px-3.5 py-2.5 text-[12.5px] font-medium border-b-2 whitespace-nowrap transition ${
         active
           ? 'border-gold text-gold'
           : 'border-transparent text-muted hover:text-white'
@@ -89,29 +158,43 @@ function Tab({ label, icon, active, onClick }: TabProps) {
   );
 }
 
+// ─── InfoRow ────────────────────────────────────────────────────────────────
+
+function InfoRow({
+  icon, label, value,
+}: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="text-muted mt-0.5">{icon}</div>
+      <div className="flex-1 min-w-0">
+        <p className="text-muted text-xs">{label}</p>
+        <p className="text-white text-sm font-medium truncate">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Field primitives ──────────────────────────────────────────────────────
+
+const inputCls =
+  'w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold transition';
+const labelCls = 'text-muted text-xs font-medium mb-1.5 block';
+const sectionTitleCls = 'text-white font-semibold text-sm mb-3 flex items-center gap-2';
+
+// ─── Main modal ─────────────────────────────────────────────────────────────
+
+type ProfileTab = 'info' | 'family' | 'background' | 'emergency' | 'documents';
+
 export function EmployeeProfileModal({
-  employee,
-  canManage,
-  onClose,
+  employee, canManage, onClose,
 }: {
   employee: Employee;
   canManage: boolean;
   onClose: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState<'info' | 'documents' | 'emergency'>('info');
+  const [activeTab, setActiveTab] = useState<ProfileTab>('info');
   const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState({
-    dateOfBirth: employee.dateOfBirth ?? '',
-    nationalId: employee.nationalId ?? '',
-    address: employee.address ?? '',
-    emergencyContactName: employee.emergencyContactName ?? '',
-    emergencyContactPhone: employee.emergencyContactPhone ?? '',
-    emergencyContactRelationship: employee.emergencyContactRelationship ?? '',
-    bankAccount: employee.bankAccount ?? '',
-    bankName: employee.bankName ?? '',
-    tinNumber: employee.tinNumber ?? '',
-    socialSecurityNumber: employee.socialSecurityNumber ?? '',
-  });
+  const [form, setForm] = useState(() => buildFormState(employee));
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
@@ -124,32 +207,80 @@ export function EmployeeProfileModal({
   const uploadPhoto = useUploadProfilePhoto();
   const updateEmployee = useUpdateEmployee();
 
+  // Lock body scroll while open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
+  // Reset form whenever the underlying employee changes (e.g., after save)
+  useEffect(() => {
+    if (!isEditing) {
+      setForm(buildFormState(employee));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employee]);
+
+  // ─── Save ────────────────────────────────────────────────────────────────
+
   const handleSave = async () => {
+    // Send only what the user actually typed. Empty strings are dropped
+    // by useUpdateEmployee before hitting the network.
     try {
       await updateEmployee.mutateAsync({
         id: employee.id,
-        ...form,
+        dateOfBirth: form.dateOfBirth || undefined,
+        nationalId: form.nationalId,
+        address: form.address,
+        residenceLocation: form.residenceLocation,
+        emergencyContactName: form.emergencyContactName,
+        emergencyContactPhone: form.emergencyContactPhone,
+        emergencyContactRelationship: form.emergencyContactRelationship,
+        bankName: form.bankName,
+        bankAccount: form.bankAccount,
+        tinNumber: form.tinNumber,
+        socialSecurityNumber: form.socialSecurityNumber,
+
+        fatherName: form.fatherName,
+        fatherOccupation: form.fatherOccupation,
+        fatherPhone: form.fatherPhone,
+        motherName: form.motherName,
+        motherOccupation: form.motherOccupation,
+        motherPhone: form.motherPhone,
+        maritalStatus: form.maritalStatus,
+        numberOfChildren:
+          form.numberOfChildren === '' ? undefined : parseInt(form.numberOfChildren, 10),
+
+        educationLevel: form.educationLevel,
+        fieldOfStudy: form.fieldOfStudy,
+        previousEmployer: form.previousEmployer,
+        previousPosition: form.previousPosition,
+        yearsOfExperience:
+          form.yearsOfExperience === '' ? undefined : parseInt(form.yearsOfExperience, 10),
+        skillsSummary: form.skillsSummary,
       });
       setIsEditing(false);
     } catch {
-      // Error handled by mutation
+      // Error toast handled by the mutation
     }
   };
+
+  const handleCancel = () => {
+    setForm(buildFormState(employee));
+    setIsEditing(false);
+  };
+
+  // ─── Upload handlers ─────────────────────────────────────────────────────
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Photo too large', { description: 'Maximum 5MB' });
       return;
     }
-    
     await uploadPhoto.mutateAsync({ employeeId: employee.id, file });
     e.target.value = '';
   };
@@ -157,19 +288,16 @@ export function EmployeeProfileModal({
   const handleDocumentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
     if (file.size > 20 * 1024 * 1024) {
       toast.error('File too large', { description: 'Maximum 20MB' });
       return;
     }
-    
     await uploadDocument.mutateAsync({
       employeeId: employee.id,
       file,
       documentType: selectedDocType,
       description: docDescription || undefined,
     });
-    
     setDocDescription('');
     e.target.value = '';
   };
@@ -182,6 +310,8 @@ export function EmployeeProfileModal({
       });
     }
   };
+
+  // ─── Render ──────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -218,11 +348,13 @@ export function EmployeeProfileModal({
                 <h2 className="text-white font-bold text-xl">{employee.name}</h2>
                 <p className="text-muted text-sm">{employee.position}</p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className={`text-[10.5px] font-mono px-2 py-0.5 rounded-full border capitalize ${
-                    employee.employmentType === 'permanent'
-                      ? 'text-success border-success'
-                      : 'text-gold border-gold'
-                  }`}>
+                  <span
+                    className={`text-[10.5px] font-mono px-2 py-0.5 rounded-full border capitalize ${
+                      employee.employmentType === 'permanent'
+                        ? 'text-success border-success'
+                        : 'text-gold border-gold'
+                    }`}
+                  >
                     {employee.employmentType}
                   </span>
                   {employee.isActive ? (
@@ -242,64 +374,86 @@ export function EmployeeProfileModal({
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-[#1a2035] px-2">
+          <div className="flex border-b border-[#1a2035] px-2 overflow-x-auto custom-scrollbar">
             <Tab
-              id="info"
-              label="Personal Info"
-              icon={<User size={14} />}
+              label="Personal"
+              icon={<User size={13} />}
               active={activeTab === 'info'}
               onClick={() => setActiveTab('info')}
             />
             <Tab
-              id="emergency"
+              label="Family"
+              icon={<Users size={13} />}
+              active={activeTab === 'family'}
+              onClick={() => setActiveTab('family')}
+            />
+            <Tab
+              label="Work Background"
+              icon={<GraduationCap size={13} />}
+              active={activeTab === 'background'}
+              onClick={() => setActiveTab('background')}
+            />
+            <Tab
               label="Emergency & Bank"
-              icon={<AlertCircle size={14} />}
+              icon={<AlertCircle size={13} />}
               active={activeTab === 'emergency'}
               onClick={() => setActiveTab('emergency')}
             />
             <Tab
-              id="documents"
-              label={`Documents ${documentsQuery.data ? `(${documentsQuery.data.documents.length})` : ''}`}
-              icon={<FileText size={14} />}
+              label={`Documents${documentsQuery.data ? ` (${documentsQuery.data.documents.length})` : ''}`}
+              icon={<FileText size={13} />}
               active={activeTab === 'documents'}
               onClick={() => setActiveTab('documents')}
             />
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-5">
+          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* PERSONAL                                                    */}
+            {/* ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'info' && (
               <div className="space-y-4">
                 {isEditing ? (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-muted text-xs font-medium mb-1.5 block">Date of Birth</label>
+                        <label className={labelCls}>Date of Birth</label>
                         <input
                           type="date"
                           value={form.dateOfBirth}
                           onChange={(e) => setForm({ ...form, dateOfBirth: e.target.value })}
-                          className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                          className={inputCls}
                         />
                       </div>
                       <div>
-                        <label className="text-muted text-xs font-medium mb-1.5 block">National ID</label>
+                        <label className={labelCls}>National ID</label>
                         <input
                           value={form.nationalId}
                           onChange={(e) => setForm({ ...form, nationalId: e.target.value })}
                           placeholder="e.g. 1199880012345678"
-                          className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                          className={inputCls}
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="text-muted text-xs font-medium mb-1.5 block">Address</label>
+                      <label className={labelCls}>Address (postal / formal)</label>
                       <textarea
                         value={form.address}
                         onChange={(e) => setForm({ ...form, address: e.target.value })}
-                        placeholder="Residential address"
+                        placeholder="Registered postal address, if different from residence"
                         rows={2}
-                        className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold resize-none"
+                        className={`${inputCls} resize-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelCls}>Residence location (where they live)</label>
+                      <input
+                        value={form.residenceLocation}
+                        onChange={(e) => setForm({ ...form, residenceLocation: e.target.value })}
+                        placeholder="e.g. Nyamata, Bugesera"
+                        className={inputCls}
                       />
                     </div>
                   </div>
@@ -316,18 +470,266 @@ export function EmployeeProfileModal({
                     <div className="col-span-2">
                       <InfoRow icon={<MapPin size={14} />} label="Address" value={employee.address ?? '—'} />
                     </div>
+                    <div className="col-span-2">
+                      <InfoRow
+                        icon={<Home size={14} />}
+                        label="Residence (where they live)"
+                        value={employee.residenceLocation ?? '—'}
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* FAMILY                                                      */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {activeTab === 'family' && (
+              <div className="space-y-5">
+                {isEditing ? (
+                  <div className="space-y-5">
+                    {/* Father */}
+                    <div>
+                      <h3 className={sectionTitleCls}>
+                        <User size={13} className="text-gold" />
+                        Father
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        <input
+                          value={form.fatherName}
+                          onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+                          placeholder="Full name"
+                          className={inputCls}
+                        />
+                        <input
+                          value={form.fatherOccupation}
+                          onChange={(e) => setForm({ ...form, fatherOccupation: e.target.value })}
+                          placeholder="Occupation"
+                          className={inputCls}
+                        />
+                        <input
+                          value={form.fatherPhone}
+                          onChange={(e) => setForm({ ...form, fatherPhone: e.target.value })}
+                          placeholder="Phone"
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mother */}
+                    <div>
+                      <h3 className={sectionTitleCls}>
+                        <User size={13} className="text-gold" />
+                        Mother
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                        <input
+                          value={form.motherName}
+                          onChange={(e) => setForm({ ...form, motherName: e.target.value })}
+                          placeholder="Full name"
+                          className={inputCls}
+                        />
+                        <input
+                          value={form.motherOccupation}
+                          onChange={(e) => setForm({ ...form, motherOccupation: e.target.value })}
+                          placeholder="Occupation"
+                          className={inputCls}
+                        />
+                        <input
+                          value={form.motherPhone}
+                          onChange={(e) => setForm({ ...form, motherPhone: e.target.value })}
+                          placeholder="Phone"
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Marital / children */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelCls}>Marital status</label>
+                        <select
+                          value={form.maritalStatus}
+                          onChange={(e) => setForm({ ...form, maritalStatus: e.target.value })}
+                          className={inputCls}
+                        >
+                          <option value="">—</option>
+                          {MARITAL_STATUSES.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelCls}>Number of children</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={form.numberOfChildren}
+                          onChange={(e) =>
+                            setForm({ ...form, numberOfChildren: e.target.value })
+                          }
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    <div>
+                      <h3 className={sectionTitleCls}>
+                        <User size={13} className="text-gold" />
+                        Father
+                      </h3>
+                      <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4 space-y-3">
+                        <InfoRow icon={<User size={14} />} label="Name" value={employee.fatherName ?? '—'} />
+                        <InfoRow icon={<Briefcase size={14} />} label="Occupation" value={employee.fatherOccupation ?? '—'} />
+                        <InfoRow icon={<Phone size={14} />} label="Phone" value={employee.fatherPhone ?? '—'} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className={sectionTitleCls}>
+                        <User size={13} className="text-gold" />
+                        Mother
+                      </h3>
+                      <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4 space-y-3">
+                        <InfoRow icon={<User size={14} />} label="Name" value={employee.motherName ?? '—'} />
+                        <InfoRow icon={<Briefcase size={14} />} label="Occupation" value={employee.motherOccupation ?? '—'} />
+                        <InfoRow icon={<Phone size={14} />} label="Phone" value={employee.motherPhone ?? '—'} />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4">
+                        <p className="text-muted text-xs mb-1">Marital status</p>
+                        <p className="text-white text-sm font-medium capitalize">
+                          {employee.maritalStatus ?? '—'}
+                        </p>
+                      </div>
+                      <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4">
+                        <p className="text-muted text-xs mb-1">Children</p>
+                        <p className="text-white text-sm font-medium">
+                          {employee.numberOfChildren ?? '—'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* WORK BACKGROUND                                             */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {activeTab === 'background' && (
+              <div className="space-y-5">
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelCls}>Education level</label>
+                        <select
+                          value={form.educationLevel}
+                          onChange={(e) => setForm({ ...form, educationLevel: e.target.value })}
+                          className={inputCls}
+                        >
+                          <option value="">—</option>
+                          {EDUCATION_LEVELS.map((l) => (
+                            <option key={l.value} value={l.value}>{l.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelCls}>Field of study</label>
+                        <input
+                          value={form.fieldOfStudy}
+                          onChange={(e) => setForm({ ...form, fieldOfStudy: e.target.value })}
+                          placeholder="e.g. Accounting"
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className={labelCls}>Previous employer</label>
+                        <input
+                          value={form.previousEmployer}
+                          onChange={(e) => setForm({ ...form, previousEmployer: e.target.value })}
+                          className={inputCls}
+                        />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Previous position</label>
+                        <input
+                          value={form.previousPosition}
+                          onChange={(e) => setForm({ ...form, previousPosition: e.target.value })}
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelCls}>Years of experience</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={form.yearsOfExperience}
+                        onChange={(e) =>
+                          setForm({ ...form, yearsOfExperience: e.target.value })
+                        }
+                        className={inputCls}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelCls}>Skills & summary</label>
+                      <textarea
+                        value={form.skillsSummary}
+                        onChange={(e) => setForm({ ...form, skillsSummary: e.target.value })}
+                        rows={4}
+                        placeholder="List key skills or a brief professional summary"
+                        className={`${inputCls} resize-none`}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4 space-y-3">
+                      <InfoRow icon={<GraduationCap size={14} />} label="Education level" value={employee.educationLevel ?? '—'} />
+                      <InfoRow icon={<FileText size={14} />} label="Field of study" value={employee.fieldOfStudy ?? '—'} />
+                      <InfoRow icon={<Building2 size={14} />} label="Previous employer" value={employee.previousEmployer ?? '—'} />
+                      <InfoRow icon={<Briefcase size={14} />} label="Previous position" value={employee.previousPosition ?? '—'} />
+                      <InfoRow
+                        icon={<Calendar size={14} />}
+                        label="Years of experience"
+                        value={employee.yearsOfExperience != null ? `${employee.yearsOfExperience} yrs` : '—'}
+                      />
+                    </div>
+                    {employee.skillsSummary && (
+                      <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4">
+                        <p className="text-muted text-xs mb-2">Skills & summary</p>
+                        <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                          {employee.skillsSummary}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* EMERGENCY & BANK                                            */}
+            {/* ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'emergency' && (
               <div className="space-y-5">
                 {isEditing ? (
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                        <AlertCircle size={14} className="text-rose-400" />
+                      <h3 className={sectionTitleCls}>
+                        <AlertCircle size={13} className="text-rose-400" />
                         Emergency Contact
                       </h3>
                       <div className="space-y-3">
@@ -335,28 +737,28 @@ export function EmployeeProfileModal({
                           value={form.emergencyContactName}
                           onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })}
                           placeholder="Contact name"
-                          className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                          className={inputCls}
                         />
                         <div className="grid grid-cols-2 gap-3">
                           <input
                             value={form.emergencyContactPhone}
                             onChange={(e) => setForm({ ...form, emergencyContactPhone: e.target.value })}
                             placeholder="Phone number"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                           <input
                             value={form.emergencyContactRelationship}
                             onChange={(e) => setForm({ ...form, emergencyContactRelationship: e.target.value })}
                             placeholder="Relationship"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                         </div>
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                        <CreditCard size={14} className="text-blue-400" />
+                      <h3 className={sectionTitleCls}>
+                        <CreditCard size={13} className="text-blue-400" />
                         Bank & Tax Information
                       </h3>
                       <div className="space-y-3">
@@ -365,13 +767,13 @@ export function EmployeeProfileModal({
                             value={form.bankName}
                             onChange={(e) => setForm({ ...form, bankName: e.target.value })}
                             placeholder="Bank name"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                           <input
                             value={form.bankAccount}
                             onChange={(e) => setForm({ ...form, bankAccount: e.target.value })}
                             placeholder="Account number"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
@@ -379,13 +781,13 @@ export function EmployeeProfileModal({
                             value={form.tinNumber}
                             onChange={(e) => setForm({ ...form, tinNumber: e.target.value })}
                             placeholder="TIN Number"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                           <input
                             value={form.socialSecurityNumber}
                             onChange={(e) => setForm({ ...form, socialSecurityNumber: e.target.value })}
                             placeholder="Social Security Number"
-                            className="w-full bg-[#080c18] border border-[#1a2035] rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-gold"
+                            className={inputCls}
                           />
                         </div>
                       </div>
@@ -394,55 +796,27 @@ export function EmployeeProfileModal({
                 ) : (
                   <div className="space-y-5">
                     <div>
-                      <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                        <AlertCircle size={14} className="text-rose-400" />
+                      <h3 className={sectionTitleCls}>
+                        <AlertCircle size={13} className="text-rose-400" />
                         Emergency Contact
                       </h3>
                       <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4 space-y-3">
-                        <InfoRow
-                          icon={<User size={14} />}
-                          label="Name"
-                          value={employee.emergencyContactName ?? '—'}
-                        />
-                        <InfoRow
-                          icon={<Phone size={14} />}
-                          label="Phone"
-                          value={employee.emergencyContactPhone ?? '—'}
-                        />
-                        <InfoRow
-                          icon={<User size={14} />}
-                          label="Relationship"
-                          value={employee.emergencyContactRelationship ?? '—'}
-                        />
+                        <InfoRow icon={<User size={14} />} label="Name" value={employee.emergencyContactName ?? '—'} />
+                        <InfoRow icon={<Phone size={14} />} label="Phone" value={employee.emergencyContactPhone ?? '—'} />
+                        <InfoRow icon={<User size={14} />} label="Relationship" value={employee.emergencyContactRelationship ?? '—'} />
                       </div>
                     </div>
 
                     <div>
-                      <h3 className="text-white font-semibold text-sm mb-3 flex items-center gap-2">
-                        <CreditCard size={14} className="text-blue-400" />
+                      <h3 className={sectionTitleCls}>
+                        <CreditCard size={13} className="text-blue-400" />
                         Bank & Tax Information
                       </h3>
                       <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4 space-y-3">
-                        <InfoRow
-                          icon={<Building2 size={14} />}
-                          label="Bank"
-                          value={employee.bankName ?? '—'}
-                        />
-                        <InfoRow
-                          icon={<CreditCard size={14} />}
-                          label="Account Number"
-                          value={employee.bankAccount ?? '—'}
-                        />
-                        <InfoRow
-                          icon={<FileText size={14} />}
-                          label="TIN Number"
-                          value={employee.tinNumber ?? '—'}
-                        />
-                        <InfoRow
-                          icon={<FileText size={14} />}
-                          label="Social Security"
-                          value={employee.socialSecurityNumber ?? '—'}
-                        />
+                        <InfoRow icon={<Building2 size={14} />} label="Bank" value={employee.bankName ?? '—'} />
+                        <InfoRow icon={<CreditCard size={14} />} label="Account Number" value={employee.bankAccount ?? '—'} />
+                        <InfoRow icon={<FileText size={14} />} label="TIN Number" value={employee.tinNumber ?? '—'} />
+                        <InfoRow icon={<FileText size={14} />} label="Social Security" value={employee.socialSecurityNumber ?? '—'} />
                       </div>
                     </div>
                   </div>
@@ -450,9 +824,11 @@ export function EmployeeProfileModal({
               </div>
             )}
 
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* DOCUMENTS                                                   */}
+            {/* ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'documents' && (
               <div className="space-y-4">
-                {/* Upload section */}
                 {canManage && (
                   <div className="bg-[#080c18] rounded-xl border border-[#1a2035] p-4">
                     <div className="flex items-center gap-3 mb-3">
@@ -490,7 +866,6 @@ export function EmployeeProfileModal({
                   </div>
                 )}
 
-                {/* Documents list */}
                 {documentsQuery.isLoading && (
                   <div className="text-center py-8 text-muted text-sm">Loading documents…</div>
                 )}
@@ -553,29 +928,13 @@ export function EmployeeProfileModal({
 
           {/* Footer */}
           <div className="flex items-center justify-between p-4 border-t border-[#1a2035]">
-            <div className="text-xs text-muted">
-              Employee ID: #{employee.id}
-            </div>
+            <div className="text-xs text-muted">Employee ID: #{employee.id}</div>
             <div className="flex gap-2">
-              {canManage && (
-                isEditing ? (
+              {canManage &&
+                (isEditing ? (
                   <>
                     <button
-                      onClick={() => {
-                        setIsEditing(false);
-                        setForm({
-                          dateOfBirth: employee.dateOfBirth ?? '',
-                          nationalId: employee.nationalId ?? '',
-                          address: employee.address ?? '',
-                          emergencyContactName: employee.emergencyContactName ?? '',
-                          emergencyContactPhone: employee.emergencyContactPhone ?? '',
-                          emergencyContactRelationship: employee.emergencyContactRelationship ?? '',
-                          bankAccount: employee.bankAccount ?? '',
-                          bankName: employee.bankName ?? '',
-                          tinNumber: employee.tinNumber ?? '',
-                          socialSecurityNumber: employee.socialSecurityNumber ?? '',
-                        });
-                      }}
+                      onClick={handleCancel}
                       className="px-4 py-2 border border-[#1a2035] rounded-xl text-muted text-sm hover:bg-[#1a2035] transition"
                     >
                       Cancel
@@ -585,9 +944,15 @@ export function EmployeeProfileModal({
                       disabled={updateEmployee.isPending}
                       className="flex items-center gap-2 px-5 py-2 bg-gold text-[#1A1408] font-bold rounded-xl text-sm hover:bg-gold/90 disabled:opacity-50 transition"
                     >
-                      {updateEmployee.isPending
-                        ? <><Loader2 size={13} className="animate-spin" /> Saving…</>
-                        : <><Save size={13} /> Save Changes</>}
+                      {updateEmployee.isPending ? (
+                        <>
+                          <Loader2 size={13} className="animate-spin" /> Saving…
+                        </>
+                      ) : (
+                        <>
+                          <Save size={13} /> Save Changes
+                        </>
+                      )}
                     </button>
                   </>
                 ) : (
@@ -597,24 +962,11 @@ export function EmployeeProfileModal({
                   >
                     <Edit2 size={13} /> Edit Info
                   </button>
-                )
-              )}
+                ))}
             </div>
           </div>
         </div>
       </div>
     </>
-  );
-}
-
-function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="text-muted mt-0.5">{icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-muted text-xs">{label}</p>
-        <p className="text-white text-sm font-medium truncate">{value}</p>
-      </div>
-    </div>
   );
 }

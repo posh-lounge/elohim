@@ -125,7 +125,6 @@ export interface LeaveRequest {
 export type EmploymentType = 'permanent' | 'contractor';
 
 // ─── Employee ───────────────────────────────────────────────────────────────
-
 export interface Employee {
   id: number;
   name: string;
@@ -142,24 +141,85 @@ export interface Employee {
   hasSystemAccess: boolean;
   baseSalary?: number;
 
-  // ── Personal information ──────────────────────────────────────────────────
-  dateOfBirth: string | null;              // ISO date (YYYY-MM-DD)
+  // Personal
+  dateOfBirth: string | null;
   nationalId: string | null;
   address: string | null;
+  residenceLocation: string | null;
 
-  // ── Emergency contact ─────────────────────────────────────────────────────
+  // Emergency
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
   emergencyContactRelationship: string | null;
 
-  // ── Bank & tax ────────────────────────────────────────────────────────────
-  bankAccount: string | null;
+  // Bank & tax
   bankName: string | null;
+  bankAccount: string | null;
   tinNumber: string | null;
   socialSecurityNumber: string | null;
 
-  // ── Media ─────────────────────────────────────────────────────────────────
-  profilePhotoPath: string | null;         // relative path under /uploads
+  // Family
+  fatherName: string | null;
+  fatherOccupation: string | null;
+  fatherPhone: string | null;
+  motherName: string | null;
+  motherOccupation: string | null;
+  motherPhone: string | null;
+  maritalStatus: string | null;
+  numberOfChildren: number | null;
+
+  // Background
+  educationLevel: string | null;
+  fieldOfStudy: string | null;
+  previousEmployer: string | null;
+  previousPosition: string | null;
+  yearsOfExperience: number | null;
+  skillsSummary: string | null;
+
+  // Media
+  profilePhotoPath: string | null;
+}
+
+export interface UpdateEmployeeInput {
+  id: number;
+  employmentType?: EmploymentType;
+  isActive?: boolean;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  position?: string;
+  department?: string;
+  baseSalary?: number;
+
+  dateOfBirth?: string;
+  nationalId?: string;
+  address?: string;
+  residenceLocation?: string;
+
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+
+  bankName?: string;
+  bankAccount?: string;
+  tinNumber?: string;
+  socialSecurityNumber?: string;
+
+  fatherName?: string;
+  fatherOccupation?: string;
+  fatherPhone?: string;
+  motherName?: string;
+  motherOccupation?: string;
+  motherPhone?: string;
+  maritalStatus?: string;
+  numberOfChildren?: number;
+
+  educationLevel?: string;
+  fieldOfStudy?: string;
+  previousEmployer?: string;
+  previousPosition?: string;
+  yearsOfExperience?: number;
+  skillsSummary?: string;
 }
 
 /** Fields a PATCH /employees/{id} call may update. */
