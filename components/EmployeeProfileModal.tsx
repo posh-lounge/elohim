@@ -15,6 +15,7 @@ import {
   useDeleteEmployeeDocument,
   useUploadProfilePhoto,
   useUpdateEmployee,
+  type UpdateEmployeeInput,
 } from '@/hooks/useEmployees';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -224,48 +225,34 @@ export function EmployeeProfileModal({
   }, [employee]);
 
   // ─── Save ────────────────────────────────────────────────────────────────
+const handleSave = async () => {
+  const original = buildFormState(employee);
+  const patch: Record<string, unknown> = {};
 
-  const handleSave = async () => {
-    // Send only what the user actually typed. Empty strings are dropped
-    // by useUpdateEmployee before hitting the network.
-    try {
-      await updateEmployee.mutateAsync({
-        id: employee.id,
-        dateOfBirth: form.dateOfBirth || undefined,
-        nationalId: form.nationalId,
-        address: form.address,
-        residenceLocation: form.residenceLocation,
-        emergencyContactName: form.emergencyContactName,
-        emergencyContactPhone: form.emergencyContactPhone,
-        emergencyContactRelationship: form.emergencyContactRelationship,
-        bankName: form.bankName,
-        bankAccount: form.bankAccount,
-        tinNumber: form.tinNumber,
-        socialSecurityNumber: form.socialSecurityNumber,
+  (Object.keys(form) as (keyof typeof form)[]).forEach((key) => {
+    if (form[key] === original[key]) return; // unchanged → don't send
 
-        fatherName: form.fatherName,
-        fatherOccupation: form.fatherOccupation,
-        fatherPhone: form.fatherPhone,
-        motherName: form.motherName,
-        motherOccupation: form.motherOccupation,
-        motherPhone: form.motherPhone,
-        maritalStatus: form.maritalStatus,
-        numberOfChildren:
-          form.numberOfChildren === '' ? undefined : parseInt(form.numberOfChildren, 10),
-
-        educationLevel: form.educationLevel,
-        fieldOfStudy: form.fieldOfStudy,
-        previousEmployer: form.previousEmployer,
-        previousPosition: form.previousPosition,
-        yearsOfExperience:
-          form.yearsOfExperience === '' ? undefined : parseInt(form.yearsOfExperience, 10),
-        skillsSummary: form.skillsSummary,
-      });
-      setIsEditing(false);
-    } catch {
-      // Error toast handled by the mutation
+    const v = form[key];
+    if (key === 'numberOfChildren' || key === 'yearsOfExperience') {
+      patch[key] = v === '' ? null : parseInt(v, 10);
+    } else {
+      patch[key] = v; // '' is converted to NULL by PHP
     }
-  };
+  });
+
+  if (Object.keys(patch).length === 0) {
+    toast.info('No changes to save');
+    setIsEditing(false);
+    return;
+  }
+
+  try {
+    await updateEmployee.mutateAsync({ id: employee.id, ...patch } as UpdateEmployeeInput);
+    setIsEditing(false);
+  } catch {
+    // Error toast handled by the mutation
+  }
+};
 
   const handleCancel = () => {
     setForm(buildFormState(employee));

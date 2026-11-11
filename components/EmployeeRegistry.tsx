@@ -18,8 +18,6 @@ function fmtDate(iso: string | null) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-/** Small circular avatar for the roster table. Falls back to initials when
- *  the employee has no profile photo on file. */
 function RosterAvatar({ employee, size = 28 }: { employee: Employee; size?: number }) {
   const initials = employee.name
     .split(' ')
@@ -56,16 +54,18 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
   const employeesQuery = useEmployees();
   const updateEmployee = useUpdateEmployee();
   const [showAdd, setShowAdd] = useState(false);
-  const [profileTarget, setProfileTarget] = useState<Employee | null>(null);
+  const [profileId, setProfileId] = useState<number | null>(null);
   const [respTarget, setRespTarget] = useState<Employee | null>(null);
   const [salaryTarget, setSalaryTarget] = useState<Employee | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'permanent' | 'contractor'>('all');
-  // Active employees by default; flip to see deactivated ones
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
   const allEmployees = employeesQuery.data?.pages.flatMap((p) => p.employees) ?? [];
   const total = employeesQuery.data?.pages[0]?.total ?? 0;
+
+  // Always the freshest copy from the query cache, so the modal updates after a save
+  const profileTarget = allEmployees.find((e) => e.id === profileId) ?? null;
 
   const toggleActive = (e: Employee) => {
     setBusyId(e.id);
@@ -75,7 +75,6 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
   const activeCount = allEmployees.filter((e) => e.isActive).length;
   const inactiveCount = allEmployees.length - activeCount;
 
-  // Everything below (type filter + counts) only looks at the current status view
   const inStatus = allEmployees.filter((e) => (status === 'active' ? e.isActive : !e.isActive));
   const filtered = inStatus.filter((e) => filter === 'all' || e.employmentType === filter);
   const permCount = inStatus.filter((e) => e.employmentType === 'permanent').length;
@@ -85,7 +84,6 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Active / Inactive switch */}
           <div className="flex gap-1 p-1 rounded-lg border border-border bg-surface-alt">
             {(['active', 'inactive'] as const).map((s) => (
               <button
@@ -100,7 +98,6 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
             ))}
           </div>
 
-          {/* Type filter */}
           <div className="flex gap-1.5">
             {(['all', 'permanent', 'contractor'] as const).map((f) => (
               <button
@@ -152,7 +149,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                   <tr key={e.id} className={`border-t border-border-soft ${!e.isActive ? 'opacity-60' : ''}`}>
                     <td className="px-4 py-2.5">
                       <button
-                        onClick={() => setProfileTarget(e)}
+                        onClick={() => setProfileId(e.id)}
                         className="flex items-center gap-2.5 text-left group"
                         title="View profile"
                       >
@@ -185,7 +182,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
                     <td className="px-4 py-2.5">
                       <div className="flex justify-end gap-1.5">
                         <button
-                          onClick={() => setProfileTarget(e)} title="View profile"
+                          onClick={() => setProfileId(e.id)} title="View profile"
                           className="w-7 h-7 flex items-center justify-center rounded-md border border-border bg-surface-alt text-muted hover:text-gold hover:border-gold transition"
                         ><UserCircle size={13} /></button>
                         <button
@@ -226,7 +223,7 @@ export function EmployeeRegistry({ canManage }: { canManage: boolean }) {
         <EmployeeProfileModal
           employee={profileTarget}
           canManage={canManage}
-          onClose={() => setProfileTarget(null)}
+          onClose={() => setProfileId(null)}
         />
       )}
     </div>

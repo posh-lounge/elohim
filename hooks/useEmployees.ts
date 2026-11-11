@@ -40,29 +40,24 @@ export function useEmployeesByRole(roleKey: string | null) {
 // ─── Create ─────────────────────────────────────────────────────────────────
 
 export interface NewEmployeeInput {
-  // Required
   name: string;
   position: string;
   department: string;
   employmentType: EmploymentType;
 
-  // Optional — core
   phone?: string;
   email?: string;
   hireDate?: string;
   notes?: string;
 
-  // Optional — personal information
   dateOfBirth?: string;
   nationalId?: string;
   address?: string;
 
-  // Optional — emergency contact
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   emergencyContactRelationship?: string;
 
-  // Optional — bank & tax
   bankName?: string;
   bankAccount?: string;
   tinNumber?: string;
@@ -76,6 +71,7 @@ export function useCreateEmployee() {
       apiRequest<{ id: number }>('/api/employees', { method: 'POST', body: input }),
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({ queryKey: EMPLOYEES_KEY });
+      queryClient.invalidateQueries({ queryKey: ['employees-all-for-picker'] });
       toast.success('Employee added', { description: input.name });
     },
     onError: (err) => toast.error('Could not add employee', { description: (err as Error).message }),
@@ -88,53 +84,53 @@ export interface UpdateEmployeeInput {
   id: number;
   employmentType?: EmploymentType;
   isActive?: boolean;
-  phone?: string;
-  email?: string;
-  notes?: string;
+  phone?: string | null;
+  email?: string | null;
+  notes?: string | null;
   position?: string;
   department?: string;
   baseSalary?: number;
 
-  // New profile fields (all optional — patch any subset)
-  dateOfBirth?: string;
-  nationalId?: string;
-  address?: string;
-  residenceLocation?: string;
+  dateOfBirth?: string | null;
+  nationalId?: string | null;
+  address?: string | null;
+  residenceLocation?: string | null;
 
-  emergencyContactName?: string;
-  emergencyContactPhone?: string;
-  emergencyContactRelationship?: string;
+  emergencyContactName?: string | null;
+  emergencyContactPhone?: string | null;
+  emergencyContactRelationship?: string | null;
 
-  bankName?: string;
-  bankAccount?: string;
-  tinNumber?: string;
-  socialSecurityNumber?: string;
+  bankName?: string | null;
+  bankAccount?: string | null;
+  tinNumber?: string | null;
+  socialSecurityNumber?: string | null;
 
-  // Family
-  fatherName?: string;
-  fatherOccupation?: string;
-  fatherPhone?: string;
-  motherName?: string;
-  motherOccupation?: string;
-  motherPhone?: string;
-  maritalStatus?: string;
-  numberOfChildren?: number;
+  fatherName?: string | null;
+  fatherOccupation?: string | null;
+  fatherPhone?: string | null;
+  motherName?: string | null;
+  motherOccupation?: string | null;
+  motherPhone?: string | null;
+  maritalStatus?: string | null;
+  numberOfChildren?: number | null;
 
-  // Work background
-  educationLevel?: string;
-  fieldOfStudy?: string;
-  previousEmployer?: string;
-  previousPosition?: string;
-  yearsOfExperience?: number;
-  skillsSummary?: string;
+  educationLevel?: string | null;
+  fieldOfStudy?: string | null;
+  previousEmployer?: string | null;
+  previousPosition?: string | null;
+  yearsOfExperience?: number | null;
+  skillsSummary?: string | null;
 }
+
 export function useUpdateEmployee() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, ...patch }: UpdateEmployeeInput) => {
+      // Drop only `undefined`. Empty strings / null are kept so a field can be cleared
+      // (the PHP side converts '' to NULL).
       const cleaned: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(patch)) {
-        if (value === '' || value === undefined) continue;
+        if (value === undefined) continue;
         cleaned[key] = value;
       }
       if (Object.keys(cleaned).length === 0) {
@@ -147,6 +143,7 @@ export function useUpdateEmployee() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: EMPLOYEES_KEY });
+      queryClient.invalidateQueries({ queryKey: ['employees-all-for-picker'] });
       toast.success('Employee updated');
     },
     onError: (err) =>
@@ -155,6 +152,7 @@ export function useUpdateEmployee() {
       }),
   });
 }
+
 // ─── Documents ──────────────────────────────────────────────────────────────
 
 export function useEmployeeDocuments(employeeId: number) {
